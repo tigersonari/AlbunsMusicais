@@ -1,9 +1,10 @@
 package topicosAlbum.resource;
 
+//não se usa @Transactional em resource
+
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -13,8 +14,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import topicosAlbum.dto.ArtistaDTO;
 import topicosAlbum.model.Artista;
-import topicosAlbum.repository.ArtistaRepository;
+import topicosAlbum.service.ArtistaService;
 
 @Path("/artistas")
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,54 +24,34 @@ import topicosAlbum.repository.ArtistaRepository;
 public class ArtistaResource {
 
     @Inject
-    ArtistaRepository repository;
+    ArtistaService service; 
 
     @GET
     public List<Artista> buscarTodos() {
-        return repository.listAll();
+        return service.findAll();
     }
 
     @GET
     @Path("/find/{nome}")
     public List<Artista> buscarPorNome(@PathParam("nome") String nome) {
-        return repository.findByNome(nome);
+        return service.findByNome(nome);
     }
 
     @POST
-    @Transactional
-    public Artista incluir(Artista artista) {
-        Artista novoArtista = new Artista();
-        novoArtista.setNome(artista.getNome());
-        novoArtista.setDataNascimento(artista.getDataNascimento());
-        novoArtista.setNacionalidade(artista.getNacionalidade());
-        novoArtista.setInstrumentoPrincipal(artista.getInstrumentoPrincipal());
-        novoArtista.setInfo(artista.getInfo());
-
-        repository.persist(novoArtista);
-
-        return novoArtista;
+    public Artista incluir(ArtistaDTO dto) {
+        return service.create(dto);
     }
 
     @PUT
     @Path("/{id}")
-    @Transactional
-    public Artista alterar(@PathParam("id") Long id, Artista artista) {
-        Artista edicaoArtista = repository.findById(id);
-        if (edicaoArtista != null) {
-            edicaoArtista.setNome(artista.getNome());
-            edicaoArtista.setDataNascimento(artista.getDataNascimento());
-            edicaoArtista.setNacionalidade(artista.getNacionalidade());
-            edicaoArtista.setInstrumentoPrincipal(artista.getInstrumentoPrincipal());
-            edicaoArtista.setInfo(artista.getInfo());
-        }
-        return edicaoArtista;
+    public void alterar(Long id, ArtistaDTO dto) {
+         service.update(id, dto);
     }
 
     @DELETE
     @Path("/{id}")
-    @Transactional
     public void apagar(@PathParam("id") Long id) {
-        repository.deleteById(id);
+        service.delete(id);
     }
 }
 

@@ -1,5 +1,7 @@
 package topicosAlbum.model;
 
+// crt + f para para alterar nomes mais rápido
+
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
