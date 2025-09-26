@@ -9,13 +9,18 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import topicosAlbum.dto.ArtistaDTO;
 import topicosAlbum.model.Artista;
+import topicosAlbum.model.Empresa;
 import topicosAlbum.repository.ArtistaRepository;
+import topicosAlbum.repository.EmpresaRepository;
 
 @ApplicationScoped //não esquecer.
 public class ArtistaServiceImpl implements ArtistaService {
 
     @Inject
     ArtistaRepository repository;
+
+    @Inject
+    EmpresaRepository repositoryEmpresa;
 
     @Override
     public List<Artista> findAll() {
@@ -41,6 +46,9 @@ public class ArtistaServiceImpl implements ArtistaService {
         novoArtista.setNacionalidade(dto.nacionalidade());
         novoArtista.setInstrumentoPrincipal(dto.instrumentoPrincipal());
         novoArtista.setInfo(dto.info());
+        //buscando empresa
+        Empresa empresa = repositoryEmpresa.findById(dto.idEmpresa());
+        novoArtista.setEmpresa(empresa);
 
         repository.persist(novoArtista);
 
@@ -56,6 +64,9 @@ public class ArtistaServiceImpl implements ArtistaService {
         edicaoArtista.setNacionalidade(dto.nacionalidade());
         edicaoArtista.setInstrumentoPrincipal(dto.instrumentoPrincipal());
         edicaoArtista.setInfo(dto.info());
+        //buscando empresa
+        Empresa empresa = repositoryEmpresa.findById(dto.idEmpresa());
+        edicaoArtista.setEmpresa(empresa);
 
     }
 

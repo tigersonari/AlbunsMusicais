@@ -7,6 +7,7 @@ public record ArtistaDTO(
     String nacionalidade,
     LocalDate dataNascimento,
     String instrumentoPrincipal, 
-    String info 
+    String info,
+    Long idEmpresa
 ) {
 }

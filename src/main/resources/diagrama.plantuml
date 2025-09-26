@@ -1,0 +1,114 @@
+@startuml
+
+package "topicosAlbum.model" {
+
+    class Album {
+        - id : Long
+        - titulo : String
+        - lancamento : LocalDate
+        - artista : Artista
+        - empresa : Empresa
+        - genero : Genero
+        - formato : Formato
+        - avaliacao : List<AvaliacaoProfissional>
+        - tamanhoDoAlbum : int
+        - duracaoTotal : double
+        - descricao : String
+        - producao : Producao
+    }
+
+    class Empresa {
+        - id : Long
+        - nomeEmpresa : String
+        - localizacao : String
+        - cnpj : String
+        - contato : String
+    }
+
+    abstract class Artista {
+       - id : Long
+       - empresa : Empresa
+    }
+
+    class ArtistaSolo extends Artista {
+       - id : Long
+       - nomeCompleto: String
+       - dataNascimento: LocalDate
+       - nacionalidade: String
+       - nomeArtistico: String
+       - instrumentoPrincipal: String
+    }
+    
+    class GrupoMusical extends Artista {
+       - id : Long
+       - nomeGrupo : String
+       - membros : List<ArtistaSolo>
+       - dataInicio : LocalDate
+       - dataTermino : LocalDate
+    }
+
+
+    class Genero {
+        - id : Long
+        - nomeGenero : String
+        - descricao : String
+    }
+
+    enum Formato {
+        +SINGLE
+        +MIXTAPE
+        +DELUXE
+        +EP
+        +LONGPLAY
+}
+
+    class AvaliacaoProfissional {
+        - id : Long
+        - avaliador : String
+        - nota : double
+        - comentario : String
+    }
+
+    class Producao {
+        - id : Long
+        - produtor : String
+        - engenheiroGravacao : String
+        - engenheiroMixagem : String
+        - engenheiroMasterizacao : String
+        - empresa : Empresa
+        - dataGravacao: LocalDate
+    }
+
+      ' RELACIONAMENTOS
+
+
+    Album "*" --> "1" Artista : pertencem a >
+    Album "*" --> "1" Empresa : lançados por >
+    Album "*" --> "*" Genero : classificado com >
+
+
+    Album "1" o-- "*" AvaliacaoProfissional : possui >
+    ' agregação. album agrega várias avaliacaoProfissional
+    ' avaliações podem existir sem o álbum (não são destruídas junto com ele)
+
+
+    Album "1" *-- "1" Producao : produzido por >
+    ' producao só existe se tiver um album, pois cada album tem um time de producao diferente e especifico
+    ' a produção é exclusiva daquele álbum (não existe sem ele).
+
+    Artista "1" --> "1" Empresa : associado a >
+    ArtistaSolo --|> Artista
+    GrupoMusical --|> Artista
+
+    GrupoMusical "1" o-- "1..*" ArtistaSolo : membros >
+    ' todo grupo precisa de pelo menos 1 membro
+
+    Album ..> Formato 
+    ' Dependência (uso do enum). album usa formato, mas formato não depende de album
+
+
+
+
+}
+
+@enduml

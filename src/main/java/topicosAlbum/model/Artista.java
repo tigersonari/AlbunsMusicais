@@ -5,6 +5,8 @@ package topicosAlbum.model;
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Artista extends DefaultEntity{
@@ -15,7 +17,9 @@ public class Artista extends DefaultEntity{
     private String instrumentoPrincipal; // ex.: guitarra, voz, bateria
     private String info; // informações adicionais sobre o artista
 
-    /*private Empresa empresa; // FOREIGN KEY -- empresa associada ao artista*/
+    @ManyToOne
+    @JoinColumn(name = "id_empresa") // nome da coluna que será criada no banco de dados
+    private Empresa empresa; // FOREIGN KEY -- empresa associada ao artista
 
     public String getNome() {
         return nome;
@@ -48,11 +52,11 @@ public class Artista extends DefaultEntity{
         this.info = info;
     }
   //* getter e setter da foreign key */
-   /*  public Empresa getEmpresa() {
+     public Empresa getEmpresa() {
         return empresa;
     }
     public void setEmpresa(Empresa empresa) {
         this.empresa = empresa;
-    }*/
+    }
     
 }
