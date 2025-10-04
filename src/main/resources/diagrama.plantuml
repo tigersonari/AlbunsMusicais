@@ -3,53 +3,51 @@
 package "topicosAlbum.model" {
 
     class Album {
-        - id : Long
         - titulo : String
         - lancamento : LocalDate
         - artista : Artista
-        - empresa : Empresa
         - genero : Genero
         - formato : Formato
+        - tipoVersao : TipoVersao
         - avaliacao : List<AvaliacaoProfissional>
-        - tamanhoDoAlbum : int
-        - duracaoTotal : double
+        - faixas : List<Faixa>
         - descricao : String
         - producao : Producao
     }
+    ' - duracaoTotal : double
+    ' duracao total pode ser calculada somando a duracao de todas as faixas
+    ' - tamanhoDoAlbum : int
+    ' tamanho do album pode ser calculado somando o tamanho de todas as faixas
 
     class Empresa {
-        - id : Long
         - nomeEmpresa : String
         - localizacao : String
         - cnpj : String
         - contato : String
     }
 
-    abstract class Artista {
-       - id : Long
+    abstract class ProjetoMusical {
        - empresa : Empresa
     }
 
-    class ArtistaSolo extends Artista {
-       - id : Long
+    class Artista extends ProjetoMusical {
        - nomeCompleto: String
        - dataNascimento: LocalDate
        - nacionalidade: String
        - nomeArtistico: String
-       - instrumentoPrincipal: String
+       - funcaoPrincipal: String
+       ' pode ser cantor, compositor, letrista, produtor, etc.
     }
     
-    class GrupoMusical extends Artista {
-       - id : Long
+    class GrupoMusical extends ProjetoMusical {
        - nomeGrupo : String
-       - membros : List<ArtistaSolo>
+       - membros : List<Artista>
        - dataInicio : LocalDate
        - dataTermino : LocalDate
     }
 
 
     class Genero {
-        - id : Long
         - nomeGenero : String
         - descricao : String
     }
@@ -60,31 +58,94 @@ package "topicosAlbum.model" {
         +DELUXE
         +EP
         +LONGPLAY
-}
+    }
+
+    enum TipoVersao {
+        + ORIGINAL
+        + REMIX
+        + ACOUSTICO
+        + LIVE
+        + INSTRUMENTAL
+        + COVER
+        + REMASTERED
+    }
+    ' enum é apenas uma maneira simplificada. profissionalmente, o ideal é criar uma tabela distinta para versão, onde o detalhamento pode ser maior.
+    ' ex> class Versao {
+    ' - id : Long
+    ' - tipo : TipoVersao
+    ' - faixaOriginal : Faixa
+    ' - faixaDerivada : Faixa
+    ' }
+
+
+    ' enum TipoMidia {
+        ' + CD
+        ' + VINIL
+        ' + FITA
+        ' + DIGITAL
+    ' }
+
 
     class AvaliacaoProfissional {
-        - id : Long
         - avaliador : String
         - nota : double
         - comentario : String
     }
 
     class Producao {
-        - id : Long
         - produtor : String
         - engenheiroGravacao : String
         - engenheiroMixagem : String
         - engenheiroMasterizacao : String
-        - empresa : Empresa
+        - empresa : Empresa 
         - dataGravacao: LocalDate
     }
+    ' empresa em produção é a empresa que fez a produção do álbum, que pode ser diferente da empresa que lançou o álbum/do artista
+
+    class Composicao {
+        - data: LocalDate
+        - artista : list<Artista>
+    }
+    ' relação com artista (letrista)
+
+     class Participacao {
+    - id : Long  
+    - projetoMusical : ProjetoMusical 
+    - papel : String             
+    - destaque : boolean 
+    }
+    ' papel pode ser "feat.", "banda de apoio", etc.
+    ' destaque indica se o participante é um artista principal (true) ou um artista de apoio
+    ' ex.: em "Eminem feat. Rihanna", Eminem é o artista principal (destaque=true) e Rihanna é a artista de apoio (destaque=false)
+    ' em "Banda X", todos os membros da banda são artistas principais (destaque=true)
+
+
+    class Faixa {
+    - titulo : String            
+    - numeroFaixa : int          
+    - duracao : double           
+    - composicao : Composicao    
+    - participacoes : List<Participacao>             
+    - idioma : String 
+    }
+    ' a produção (produtor, engenheiros, gravadora, etc.) normalmente é atribuída ao álbum como um todo, não a cada faixa individual.
+    ' porém, em alguns casos especiais, cada faixa pode ter produtores diferentes (ex.: álbuns de K-pop, onde cada faixa pode ter equipes diferentes).
+    ' então PENSAR se a modelagem mais complexa - e mais realista - com producao em faixa vale a pena.
+    ' por ora, deixar a produção vinculada ao álbum como um todo.
+
+    
 
       ' RELACIONAMENTOS
 
 
-    Album "*" --> "1" Artista : pertencem a >
-    Album "*" --> "1" Empresa : lançados por >
-    Album "*" --> "*" Genero : classificado com >
+    Album "*" --> "*" Artista : pertencemA >
+    'existem álbuns colaborativos (mais de um artista principal).
+
+    'Album "*" --> "1" Empresa : lançados por > (tirado por ser bidirecional. artista já está associado a empresa. necessário apenas uma query)
+
+    Album "*" --> "*" Genero : classificadoCom >
+    
+    
 
 
     Album "1" o-- "*" AvaliacaoProfissional : possui >
@@ -92,21 +153,46 @@ package "topicosAlbum.model" {
     ' avaliações podem existir sem o álbum (não são destruídas junto com ele)
 
 
-    Album "1" *-- "1" Producao : produzido por >
+    ' Faixa "1" *-- "1" Producao : produzidoPor >
     ' producao só existe se tiver um album, pois cada album tem um time de producao diferente e especifico
     ' a produção é exclusiva daquele álbum (não existe sem ele).
 
-    Artista "1" --> "1" Empresa : associado a >
-    ArtistaSolo --|> Artista
-    GrupoMusical --|> Artista
 
-    GrupoMusical "1" o-- "1..*" ArtistaSolo : membros >
+    Album "1"*--> "*" Faixa : contem
+
+    Album "1" *-- "1" Producao : tem >
+    ' composição forte. produção não existe sem o álbum. se o álbum for deletado, a produção também é.
+
+    Artista "*" --> "1" Empresa : associadoA >
+    
+    Producao "1" --> "1" Empresa : realizadaPor >
+    
+
+    GrupoMusical "1" o-- "1..*" Artista : membros >
     ' todo grupo precisa de pelo menos 1 membro
 
     Album ..> Formato 
     ' Dependência (uso do enum). album usa formato, mas formato não depende de album
+    
+    Album ..> TipoVersao
+
+    Faixa "1" *--> "1" Composicao: compostaPor >
+    ' composição forte. se a faixa for deletada, a composição também é.
 
 
+    'Faixa "*" --> "*" ProjetoMusical : participacao >
+    ' uma faixa pode ter participação de vários artistas ou grupos musicais (ex.: feat., banda de apoio, etc.)
+
+
+    Faixa "1" --> "*" Participacao: tem >
+    ' uma faixa pode ter várias participações (feat., banda de apoio, etc.)
+
+    Participacao "*" --> "1" ProjetoMusical: referenteA >
+    ' uma participação está sempre vinculada a um projeto musical (artista ou grupo musical)
+
+
+    Composicao "1" o--> "*" Artista: letristaEtc
+    ' uma composição pode existir independente de uma faixa (ex.: música ainda não gravada).
 
 
 }
