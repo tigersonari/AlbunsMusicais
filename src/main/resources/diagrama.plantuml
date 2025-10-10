@@ -5,14 +5,9 @@ package "topicosAlbum.model" {
     class Album {
         - titulo : String
         - lancamento : LocalDate
-        - artista : Artista
-        - genero : Genero
-        - formato : Formato
-        - tipoVersao : TipoVersao
         - avaliacao : List<AvaliacaoProfissional>
         - faixas : List<Faixa>
         - descricao : String
-        - producao : Producao
     }
     ' - duracaoTotal : double
     ' duracao total pode ser calculada somando a duracao de todas as faixas
@@ -97,7 +92,6 @@ package "topicosAlbum.model" {
         - engenheiroGravacao : String
         - engenheiroMixagem : String
         - engenheiroMasterizacao : String
-        - empresa : Empresa 
         - dataGravacao: LocalDate
     }
     ' empresa em produção é a empresa que fez a produção do álbum, que pode ser diferente da empresa que lançou o álbum/do artista
@@ -123,8 +117,7 @@ package "topicosAlbum.model" {
     class Faixa {
     - titulo : String            
     - numeroFaixa : int          
-    - duracao : double           
-    - composicao : Composicao    
+    - duracao : double              
     - participacoes : List<Participacao>             
     - idioma : String 
     }
@@ -138,12 +131,14 @@ package "topicosAlbum.model" {
       ' RELACIONAMENTOS
 
 
-    Album "*" --> "*" Artista : pertencemA >
+    Album "*" --> "*" ProjetoMusical : pertencemA >
     'existem álbuns colaborativos (mais de um artista principal).
 
     'Album "*" --> "1" Empresa : lançados por > (tirado por ser bidirecional. artista já está associado a empresa. necessário apenas uma query)
 
-    Album "*" --> "*" Genero : classificadoCom >
+    Faixa "1" --> "1" Genero : classificadoCom >
+    ' pensar se gênero deve ser uma lista (mais de um gênero por faixa)
+    ' pensar se gênero deve ser associado ao album em vez de faixa
     
     
 
@@ -163,7 +158,7 @@ package "topicosAlbum.model" {
     Album "1" *-- "1" Producao : tem >
     ' composição forte. produção não existe sem o álbum. se o álbum for deletado, a produção também é.
 
-    Artista "*" --> "1" Empresa : associadoA >
+    ProjetoMusical "*" --> "1" Empresa : associadoA >
     
     Producao "1" --> "1" Empresa : realizadaPor >
     
@@ -174,7 +169,7 @@ package "topicosAlbum.model" {
     Album ..> Formato 
     ' Dependência (uso do enum). album usa formato, mas formato não depende de album
     
-    Album ..> TipoVersao
+    Faixa ..> TipoVersao
 
     Faixa "1" *--> "1" Composicao: compostaPor >
     ' composição forte. se a faixa for deletada, a composição também é.
