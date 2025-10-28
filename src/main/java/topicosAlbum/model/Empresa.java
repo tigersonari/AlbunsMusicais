@@ -5,16 +5,16 @@ import jakarta.persistence.Entity;
 @Entity
 public class Empresa extends DefaultEntity{
     
-    private String nome;
+    private String nomeEmpresa;
     private String cnpj;
     private String localizacao;
     private String contato;
 
-    public String getNome() {
-        return nome;
+    public String getNomeEmpresa() {
+        return nomeEmpresa;
     }
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setNomeEmpresa(String nomeEmpresa) {
+        this.nomeEmpresa = nomeEmpresa;
     }
     public String getCnpj() {
         return cnpj;

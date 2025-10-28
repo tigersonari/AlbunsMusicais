@@ -1,19 +1,32 @@
 package topicosAlbum.model;
 
-import java.time.LocalDate;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 @Entity
-public class GrupoMusical extends Artista{
-    
+public class GrupoMusical extends ProjetoMusical {
+
     private String nomeGrupo;
-    private int numeroIntegrantes;
-    private String generoMusical; // alterar para ENUM e adicionar como FK
-    private String info; // informações adicionais sobre o grupo
-    private String membros; // depois colocar como (List<ArtistaSolo>) → relação com artistas solos que compõem o grupo
-    private LocalDate dataFormacao;
-    
+    private LocalDate dataInicio;
+    private LocalDate dataTermino;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+        name = "grupo_musical_artista",
+        joinColumns = @JoinColumn(name = "idGrupo"),
+        inverseJoinColumns = @JoinColumn(name = "idArtista")
+    )
+    private List<Artista> membros;
+
+
     public String getNomeGrupo() {
         return nomeGrupo;
     }
@@ -21,43 +34,28 @@ public class GrupoMusical extends Artista{
     public void setNomeGrupo(String nomeGrupo) {
         this.nomeGrupo = nomeGrupo;
     }
-    public int getNumeroIntegrantes() {
-        return numeroIntegrantes;
-    }
-    public void setNumeroIntegrantes(int numeroIntegrantes) {
-        this.numeroIntegrantes = numeroIntegrantes;
+
+    public LocalDate getDataInicio() {
+        return dataInicio;
     }
 
-    public String getGeneroMusical() {
-        return generoMusical;
+    public void setDataInicio(LocalDate dataInicio) {
+        this.dataInicio = dataInicio;
     }
 
-    public void setGeneroMusical(String generoMusical) {
-        this.generoMusical = generoMusical;
+    public LocalDate getDataTermino() {
+        return dataTermino;
     }
 
-    public String getInfo() {
-        return info;
+    public void setDataTermino(LocalDate dataTermino) {
+        this.dataTermino = dataTermino;
     }
 
-    public void setInfo(String info) {
-        this.info = info;
-    }
-
-    public String getMembros() {
+    public List<Artista> getMembros() {
         return membros;
     }
 
-    public void setMembros(String membros) {
+    public void setMembros(List<Artista> membros) {
         this.membros = membros;
     }
-
-    public LocalDate getDataFormacao() {
-        return dataFormacao;
-    }
-
-    public void setDataFormacao(LocalDate dataFormacao) {
-        this.dataFormacao = dataFormacao;
-    }
-    
 }

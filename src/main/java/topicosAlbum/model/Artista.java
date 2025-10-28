@@ -1,62 +1,59 @@
 package topicosAlbum.model;
 
-// crt + f para para alterar nomes mais rápido
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Artista extends DefaultEntity{
-    
-    private String nome;
-    private String nacionalidade;
+public class Artista extends ProjetoMusical {
+
+    @Column(nullable = false)
+    private String nomeCompleto;
     private LocalDate dataNascimento;
-    private String instrumentoPrincipal; // ex.: guitarra, voz, bateria
-    private String info; // informações adicionais sobre o artista
+    private String nacionalidade;
+    private String nomeArtistico;
+    private String funcaoPrincipal;
 
-    @ManyToOne
-    @JoinColumn(name = "id_empresa") // nome da coluna que será criada no banco de dados
-    private Empresa empresa; // FOREIGN KEY -- empresa associada ao artista
 
-    public String getNome() {
-        return nome;
+    public String getNomeCompleto() {
+        return nomeCompleto;
     }
-    public void setNome(String nome) {
-        this.nome = nome;
+
+    public void setNomeCompleto(String nomeCompleto) {
+        this.nomeCompleto = nomeCompleto;
     }
-    public String getNacionalidade() {
-        return nacionalidade;
-    }
-    public void setNacionalidade(String nacionalidade) {
-        this.nacionalidade = nacionalidade;
-    }
+
     public LocalDate getDataNascimento() {
         return dataNascimento;
     }
+
     public void setDataNascimento(LocalDate dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
-    public String getInstrumentoPrincipal() {
-        return instrumentoPrincipal;
+
+    public String getNacionalidade() {
+        return nacionalidade;
     }
-    public void setInstrumentoPrincipal(String instrumentoPrincipal) {
-        this.instrumentoPrincipal = instrumentoPrincipal;
+
+    public void setNacionalidade(String nacionalidade) {
+        this.nacionalidade = nacionalidade;
     }
-    public String getInfo() {
-        return info;
+
+    public String getNomeArtistico() {
+        return nomeArtistico;
     }
-    public void setInfo(String info) {
-        this.info = info;
+
+    public void setNomeArtistico(String nomeArtistico) {
+        this.nomeArtistico = nomeArtistico;
     }
-  //* getter e setter da foreign key */
-     public Empresa getEmpresa() {
-        return empresa;
+
+    public String getFuncaoPrincipal() {
+        return funcaoPrincipal;
     }
-    public void setEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+
+    public void setFuncaoPrincipal(String funcaoPrincipal) {
+        this.funcaoPrincipal = funcaoPrincipal;
     }
-    
 }
