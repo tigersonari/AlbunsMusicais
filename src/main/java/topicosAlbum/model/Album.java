@@ -4,8 +4,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -18,31 +22,35 @@ public class Album extends DefaultEntity {
     private String descricao;
 
     @OneToOne
-    @JoinColumn(name = "idProducao")
+    @JoinColumn(name = "id_producao")
     private Producao producao;
 
-    //enum
+    @Enumerated(EnumType.STRING)
     private Formato formato;
 
-    @OneToMany
-    @JoinColumn(name = "idAvaliacaoProfissional")
+     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvaliacaoProfissional> avaliacaoProfissional = new ArrayList<>();
     /*lista todas as avaliações que o album recebeu */
 
-    @OneToMany
-    @JoinColumn(name = "idFaixa")
-    private Faixa faixa;
+    @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Faixa> faixas = new ArrayList<>();
+    
+   // álbum pode ter múltiplos artistas principais
+    @ManyToMany
+    @JoinTable(
+        name = "album_projeto_musical",
+        joinColumns = @JoinColumn(name = "id_album"),
+        inverseJoinColumns = @JoinColumn(name = "id_projeto_musical")
+    )
+    private List<ProjetoMusical> projetoMusical = new ArrayList<>();
 
     @ManyToMany
-    @JoinColumn(name = "idProjetoMusical")
-    private ProjetoMusical projetoMusical;
-    /*pensar se deve ser colocado como um arraylist, já que existem álbuns colaborativos,
-     * exemplo: "Watch the Throne" do Jay-Z com Kanye West
-     */
-
-     @OneToMany
-     @JoinColumn(name = "idGenero")
-     private List<Genero> genero = new ArrayList<>();
+    @JoinTable(
+        name = "album_genero",
+        joinColumns = @JoinColumn(name = "id_album"),
+        inverseJoinColumns = @JoinColumn(name = "id_genero")
+    )
+    private List<Genero> generos = new ArrayList<>();
      /*pois apesar de faixa ter somente um gênero, o álbum que é composto por muitas
       * faixas pode ser classificado em mais de um gênero devido à diversidade das faixas.
       isso é necessário, pois em uma query de álbuns por gênero, o álbum será listado corretamente com 
@@ -92,22 +100,6 @@ public class Album extends DefaultEntity {
         this.formato = formato;
     }
 
-    public Faixa getFaixa() {
-        return faixa;
-    }
-
-    public void setFaixa(Faixa faixa) {
-        this.faixa = faixa;
-    }
-
-    public ProjetoMusical getProjetoMusical() {
-        return projetoMusical;
-    }
-
-    public void setProjetoMusical(ProjetoMusical projetoMusical) {
-        this.projetoMusical = projetoMusical;
-    }
-
     public List<AvaliacaoProfissional> getAvaliacaoProfissional() {
         return avaliacaoProfissional;
     }
@@ -116,12 +108,30 @@ public class Album extends DefaultEntity {
         this.avaliacaoProfissional = avaliacaoProfissional;
     }
 
-    public List<Genero> getGenero() {
-        return genero;
+    public List<Faixa> getFaixa() {
+        return faixas;
     }
+
+    public void setFaixas(List<Faixa> faixas) {
+        this.faixas = faixas;
+    }
+
+    public List<ProjetoMusical> getProjetoMusical() {
+        return projetoMusical;
+    }
+
+    public void setProjetoMusical(List<ProjetoMusical> projetoMusical) {
+        this.projetoMusical = projetoMusical;
+    }
+
+    public List<Genero> getGeneros() {
+        return generos;
+    }
+
+    public void setGeneros(List<Genero> generos) {
+        this.generos = generos;
+    }
+
     
-    public void setGenero(List<Genero> genero) {
-        this.genero = genero;
-    }
 
 }
