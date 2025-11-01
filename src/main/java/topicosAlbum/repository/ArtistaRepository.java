@@ -5,7 +5,11 @@ import java.util.List;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import topicosAlbum.model.Album;
 import topicosAlbum.model.Artista;
+import topicosAlbum.model.Composicao;
+import topicosAlbum.model.Faixa;
+import topicosAlbum.model.GrupoMusical;
 
 @ApplicationScoped
 public class ArtistaRepository implements PanacheRepository<Artista> {
@@ -31,19 +35,20 @@ public class ArtistaRepository implements PanacheRepository<Artista> {
     }
 
     // grupos musicais que o artista integra
-    public List<?> findGruposByArtistaId(Long idArtista) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT DISTINCT g FROM GrupoMusical g
-                JOIN g.membros m
-                WHERE m.id = :idArtista
-            """)
-            .setParameter("idArtista", idArtista)
-            .getResultList();
-    }
+   public List<GrupoMusical> findGruposByArtistaId(Long idArtista) {
+    return getEntityManager()
+        .createQuery("""
+            SELECT DISTINCT g FROM GrupoMusical g
+            JOIN g.membros m
+            WHERE m.id = :idArtista
+        """, GrupoMusical.class)
+        .setParameter("idArtista", idArtista)
+        .getResultList();
+}
+
 
     // albuns do artista (como principal)
-    public List<?> findAlbunsPrincipaisByArtistaId(Long idArtista) {
+    public List<Album> findAlbunsPrincipaisByArtistaId(Long idArtista) {
         return getEntityManager()
             .createQuery("""
                 SELECT DISTINCT a FROM Album a
@@ -55,7 +60,7 @@ public class ArtistaRepository implements PanacheRepository<Artista> {
     }
 
     // albuns em que o artista participa (feats, apoio, etc.)
-    public List<?> findAlbunsComParticipacaoByArtistaId(Long idArtista) {
+    public List<Album> findAlbunsComParticipacaoByArtistaId(Long idArtista) {
         return getEntityManager()
             .createQuery("""
                 SELECT DISTINCT a FROM Album a
@@ -69,7 +74,7 @@ public class ArtistaRepository implements PanacheRepository<Artista> {
     }
 
     // faixas com participação do artista
-    public List<?> findFaixasParticipadasByArtistaId(Long idArtista) {
+    public List<Faixa> findFaixasParticipadasByArtistaId(Long idArtista) {
         return getEntityManager()
             .createQuery("""
                 SELECT DISTINCT f FROM Faixa f
@@ -82,7 +87,7 @@ public class ArtistaRepository implements PanacheRepository<Artista> {
     }
 
     // composições criadas pelo artista (como compositor/letrista)
-    public List<?> findComposicoesByArtistaId(Long idArtista) {
+    public List<Composicao> findComposicoesByArtistaId(Long idArtista) {
         return getEntityManager()
             .createQuery("""
                 SELECT DISTINCT c FROM Composicao c

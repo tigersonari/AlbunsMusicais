@@ -10,8 +10,9 @@ import topicosAlbum.model.AvaliacaoProfissional;
 public class AvaliacaoProfissionalRepository implements PanacheRepository<AvaliacaoProfissional> {
 
     public List<AvaliacaoProfissional> findByAlbumId(Long idAlbum) {
-        return find("album.id", idAlbum).list();
+    return find("idAlbum", idAlbum).list();
     }
+
 
     public List<AvaliacaoProfissional> findByAvaliador(String avaliador) {
         return find("LOWER(avaliador) LIKE ?1", "%" + avaliador.toLowerCase() + "%").list();

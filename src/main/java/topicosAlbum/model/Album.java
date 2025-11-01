@@ -6,8 +6,6 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -22,33 +20,35 @@ public class Album extends DefaultEntity {
     private String descricao;
 
     @OneToOne
-    @JoinColumn(name = "id_producao")
+    @JoinColumn(name = "idProducao")
     private Producao producao;
 
-    @Enumerated(EnumType.STRING)
+    /*enum */
     private Formato formato;
 
-     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "idAlbum") // FK vai pra tabela de Avaliacao
     private List<AvaliacaoProfissional> avaliacaoProfissional = new ArrayList<>();
+
     /*lista todas as avaliações que o album recebeu */
 
-    @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Faixa> faixas = new ArrayList<>();
+    /*@OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Faixa> faixas = new ArrayList<>();*/
     
    // álbum pode ter múltiplos artistas principais
     @ManyToMany
     @JoinTable(
         name = "album_projeto_musical",
-        joinColumns = @JoinColumn(name = "id_album"),
-        inverseJoinColumns = @JoinColumn(name = "id_projeto_musical")
+        joinColumns = @JoinColumn(name = "idAlbum"),
+        inverseJoinColumns = @JoinColumn(name = "idProjetoMusical")
     )
     private List<ProjetoMusical> projetoMusical = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
         name = "album_genero",
-        joinColumns = @JoinColumn(name = "id_album"),
-        inverseJoinColumns = @JoinColumn(name = "id_genero")
+        joinColumns = @JoinColumn(name = "idAlbum"),
+        inverseJoinColumns = @JoinColumn(name = "idGenero")
     )
     private List<Genero> generos = new ArrayList<>();
      /*pois apesar de faixa ter somente um gênero, o álbum que é composto por muitas
@@ -108,13 +108,13 @@ public class Album extends DefaultEntity {
         this.avaliacaoProfissional = avaliacaoProfissional;
     }
 
-    public List<Faixa> getFaixa() {
+    /*public List<Faixa> getFaixa() {
         return faixas;
     }
 
     public void setFaixas(List<Faixa> faixas) {
         this.faixas = faixas;
-    }
+    }*/
 
     public List<ProjetoMusical> getProjetoMusical() {
         return projetoMusical;

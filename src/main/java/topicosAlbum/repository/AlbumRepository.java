@@ -19,36 +19,31 @@ public class AlbumRepository implements PanacheRepository<Album> {
     }
 
     public List<Album> findByAnoLancamento(int ano) {
-        return find("YEAR(lancamento) = ?1", ano).list();
+        return find("EXTRACT(YEAR FROM lancamento) = ?1", ano).list();
     }
 
-
-    // buscar álbuns por artista principal (múltiplos artistas possíveis)
-    public List<Album> findByProjetoMusicalId(Long idProjeto) {
+    public List<Album> findByProjetoMusicalId(Long idProjetoMusical) {
         return find("""
             SELECT DISTINCT a FROM Album a
             JOIN a.projetoMusical p
             WHERE p.id = ?1
-        """, idProjeto).list();
+        """, idProjetoMusical).list();
     }
 
-    // buscar álbuns que são colaborações entre dois artistas específicos
-    public List<Album> findColaboracoesEntre(Long idArtista1, Long idArtista2) {
+    public List<Album> findColaboracoesEntre(Long idProjetoMusical1, Long idProjetoMusical2) {
         return find("""
             SELECT DISTINCT a FROM Album a
             JOIN a.projetoMusical p1
             JOIN a.projetoMusical p2
             WHERE p1.id = ?1 AND p2.id = ?2
-        """, idArtista1, idArtista2).list();
+        """, idProjetoMusical1, idProjetoMusical2).list();
     }
 
-    // buscar álbuns produzidos pela empresa 
     public List<Album> findByEmpresaProducao(Long idEmpresa) {
         return find("""
             SELECT DISTINCT a FROM Album a
             JOIN a.producao pr
-            JOIN pr.empresa e
-            WHERE e.id = ?1
+            WHERE pr.empresa.id = ?1
         """, idEmpresa).list();
     }
 
@@ -76,99 +71,29 @@ public class AlbumRepository implements PanacheRepository<Album> {
         """, "%" + nome.toLowerCase() + "%").list();
     }
 
-    // buscar álbuns que tenham faixas de um gênero específico
     public List<Album> findByGeneroId(Long idGenero) {
         return find("""
             SELECT DISTINCT a FROM Album a
-            JOIN a.faixas f
-            JOIN f.genero g
+            JOIN a.generos g
             WHERE g.id = ?1
         """, idGenero).list();
     }
 
-    // buscar álbuns onde um artista participa (feat, banda de apoio etc.)
-    public List<Album> findByParticipacaoArtistaId(Long idArtista) {
+    public List<Album> findByParticipacao(Long idProjetoMusical) {
         return find("""
             SELECT DISTINCT a FROM Album a
             JOIN a.faixas f
-            JOIN f.participacoes part
-            JOIN part.projetoMusical pm
-            WHERE pm.id = ?1
-        """, idArtista).list();
+            JOIN f.participacao part
+            WHERE part.projetoMusical.id = ?1
+        """, idProjetoMusical).list();
     }
 
-    // buscar todas as avaliações de um álbum
-    public List<?> findAvaliacoesByAlbumId(Long idAlbum) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT av FROM AvaliacaoProfissional av
-                JOIN av.album a
-                WHERE a.id = :idAlbum
-            """)
-            .setParameter("idAlbum", idAlbum)
-            .getResultList();
-    }
-
-    public List<?> findAvaliacoesByAvaliador(Long idAlbum, String avaliador) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT av FROM AvaliacaoProfissional av
-                JOIN av.album a
-                WHERE a.id = :idAlbum
-                AND LOWER(av.avaliador) LIKE :avaliador
-            """)
-            .setParameter("idAlbum", idAlbum)
-            .setParameter("avaliador", "%" + avaliador.toLowerCase() + "%")
-            .getResultList();
-    }
-
-    // buscar avaliações de um álbum com nota mínima
-    public List<?> findAvaliacoesByNotaMinima(Long idAlbum, double notaMinima) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT av FROM AvaliacaoProfissional av
-                JOIN av.album a
-                WHERE a.id = :idAlbum
-                AND av.nota >= :nota
-            """)
-            .setParameter("idAlbum", idAlbum)
-            .setParameter("nota", notaMinima)
-            .getResultList();
-    }
-
-    // buscar a produção associada a um álbum
-    public Object findProducaoByAlbumId(Long idAlbum) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT p FROM Producao p
-                JOIN p.album a
-                WHERE a.id = :idAlbum
-            """)
-            .setParameter("idAlbum", idAlbum)
-            .getSingleResult();
-    }
-
-    // buscar álbuns por nome da faixa. ex: quero saber de qual album é a faixa "the feels"
     public List<Album> findByFaixaTitulo(String tituloFaixa) {
-    return find("""
-        SELECT DISTINCT a FROM Album a
-        JOIN a.faixas f
-        WHERE LOWER(f.titulo) LIKE ?1
-    """, "%" + tituloFaixa.toLowerCase() + "%").list();
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.faixas f
+            WHERE LOWER(f.titulo) LIKE ?1
+        """, "%" + tituloFaixa.toLowerCase() + "%").list();
+    }
 }
 
-    // buscar todos gêneros de um álbum atraves das faixas, sem repetição
-    public List<?> findGenerosDoAlbum(Long idAlbum) {
-    return getEntityManager()
-        .createQuery("""
-            SELECT DISTINCT g FROM Genero g
-            JOIN g.faixas f
-            JOIN f.album a
-            WHERE a.id = :idAlbum
-        """)
-        .setParameter("idAlbum", idAlbum)
-        .getResultList();
-}
-
-
-}

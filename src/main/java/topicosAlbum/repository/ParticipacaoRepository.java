@@ -9,12 +9,28 @@ import topicosAlbum.model.Participacao;
 @ApplicationScoped
 public class ParticipacaoRepository implements PanacheRepository<Participacao> {
 
+    // buscar participações de uma faixa
     public List<Participacao> findByFaixaId(Long idFaixa) {
-        return find("faixa.id", idFaixa).list();
+        return getEntityManager()
+            .createQuery("""
+                SELECT p FROM Faixa f
+                JOIN f.participacoes p
+                WHERE f.id = :idFaixa
+            """, Participacao.class)
+            .setParameter("idFaixa", idFaixa)
+            .getResultList();
     }
 
+    //  uscar participações de um artista ou grupo
     public List<Participacao> findByProjetoMusicalId(Long idProjeto) {
-        return find("projetoMusical.id", idProjeto).list();
+        return getEntityManager()
+            .createQuery("""
+                SELECT DISTINCT p FROM Participacao p
+                JOIN p.projetoMusical proj
+                WHERE proj.id = :idProjeto
+            """, Participacao.class)
+            .setParameter("idProjeto", idProjeto)
+            .getResultList();
     }
 
     public List<Participacao> findByPapel(String papel) {
@@ -25,15 +41,15 @@ public class ParticipacaoRepository implements PanacheRepository<Participacao> {
         return find("destaque = true").list();
     }
 
-    // buscar participações de um álbum
-    public List<?> findByAlbumId(Long idAlbum) {
+    // buscar participações de um álbum via faixas
+    public List<Participacao> findByAlbumId(Long idAlbum) {
         return getEntityManager()
             .createQuery("""
-                SELECT DISTINCT p FROM Participacao p
-                JOIN p.faixa f
-                JOIN f.album a
+                SELECT DISTINCT p FROM Album a
+                JOIN a.faixas f
+                JOIN f.participacoes p
                 WHERE a.id = :idAlbum
-            """)
+            """, Participacao.class)
             .setParameter("idAlbum", idAlbum)
             .getResultList();
     }

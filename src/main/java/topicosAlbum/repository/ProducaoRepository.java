@@ -26,12 +26,12 @@ public class ProducaoRepository implements PanacheRepository<Producao> {
         return find("LOWER(engenheiroMasterizacao) LIKE ?1", "%" + nome.toLowerCase() + "%").list();
     }
 
-    public List<Producao> findByDataGravacao(LocalDate data) {
-        return find("dataGravacao", data).list();
+    public List<Producao> findByDataProducao(LocalDate data) {
+        return find("dataProducao", data).list();
     }
 
-    public List<Producao> findByPeriodoGravacao(LocalDate inicio, LocalDate fim) {
-        return find("dataGravacao BETWEEN ?1 AND ?2", inicio, fim).list();
+    public List<Producao> findByPeriodoProducao(LocalDate inicio, LocalDate fim) {
+        return find("dataProducao BETWEEN ?1 AND ?2", inicio, fim).list();
     } /*busca produções em um intervalo de datas de gravação */
 
     public List<Producao> findByEmpresaId(Long idEmpresa) {
@@ -39,6 +39,12 @@ public class ProducaoRepository implements PanacheRepository<Producao> {
     }
 
     public Producao findByAlbumId(Long idAlbum) {
-        return find("album.id", idAlbum).firstResult();
+        return getEntityManager()
+            .createQuery("""
+                SELECT a.producao FROM Album a
+                WHERE a.id = :idAlbum
+            """, Producao.class)
+            .setParameter("idAlbum", idAlbum)
+            .getSingleResult();
     }
 }

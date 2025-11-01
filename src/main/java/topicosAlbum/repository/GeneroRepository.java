@@ -14,15 +14,18 @@ public class GeneroRepository implements PanacheRepository<Genero> {
         return find("LOWER(nomeGenero) LIKE ?1", "%" + nome.toLowerCase() + "%").list();
     }
 
-    // buscar gêneros usados em faixas de um álbum
-    public List<?> findByAlbumId(Long idAlbum) {
+    public boolean existsByNome(String nomeGenero) {
+        return find("LOWER(nomeGenero) = ?1", nomeGenero.toLowerCase()).firstResultOptional().isPresent();
+    }
+
+    // busca gênero por álbum via Faixa 
+    public List<Genero> findByAlbumId(Long idAlbum) {
         return getEntityManager()
             .createQuery("""
-                SELECT DISTINCT g FROM Genero g
-                JOIN g.faixas f
-                JOIN f.album a
-                WHERE a.id = :idAlbum
-            """)
+                SELECT DISTINCT g FROM Faixa f
+                JOIN f.genero g
+                WHERE f.album.id = :idAlbum
+            """, Genero.class)
             .setParameter("idAlbum", idAlbum)
             .getResultList();
     }

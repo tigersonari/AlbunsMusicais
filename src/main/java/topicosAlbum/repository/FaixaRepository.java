@@ -1,11 +1,11 @@
 package topicosAlbum.repository;
 
-
 import java.util.List;
-
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import topicosAlbum.model.Faixa;
+import topicosAlbum.model.ProjetoMusical;
+import topicosAlbum.model.TipoVersao;
 
 @ApplicationScoped
 public class FaixaRepository implements PanacheRepository<Faixa> {
@@ -14,82 +14,70 @@ public class FaixaRepository implements PanacheRepository<Faixa> {
         return find("LOWER(titulo) LIKE ?1", "%" + titulo.toLowerCase() + "%").list();
     }
 
-    // buscar faixas por álbum. ex:
     public List<Faixa> findByAlbumId(Long idAlbum) {
-        return find("""
-            SELECT f FROM Faixa f
-            JOIN f.album a
-            WHERE a.id = ?1
-        """, idAlbum).list();
+        return find("album.id = ?1", idAlbum).list();
     }
 
-    public List<Faixa> findByParticipacaoArtistaId(Long idArtista) {
-        return find("""
+    // Participação — artista que participou da faixa
+    public List<Faixa> findByParticipacaoArtistaId(Long idProjetoMusical) {
+        return getEntityManager().createQuery("""
             SELECT DISTINCT f FROM Faixa f
             JOIN f.participacoes p
-            JOIN p.projetoMusical pm
-            WHERE pm.id = ?1
-        """, idArtista).list();
+            JOIN p.projetoMusical proj
+            WHERE proj.id = :id
+        """, Faixa.class)
+        .setParameter("id", idProjetoMusical)
+        .getResultList();
     }
 
-    // dono (artistas principais via álbum)
-    public List<?> findArtistasPrincipaisByFaixaId(Long idFaixa) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT DISTINCT p FROM Album a
-                JOIN a.projetoMusical p
-                JOIN a.faixas f
-                WHERE f.id = :idFaixa
-            """)
-            .setParameter("idFaixa", idFaixa)
-            .getResultList();
-    }
+    // Artistas principais da faixa via Album
+    public List<ProjetoMusical> findArtistasPrincipaisByFaixaId(Long idFaixa) {
+    return getEntityManager().createQuery("""
+        SELECT DISTINCT pm FROM Album a
+        JOIN a.projetoMusical pm
+        JOIN Faixa f ON f.album = a
+        WHERE f.id = :idFaixa
+    """, ProjetoMusical.class)
+    .setParameter("idFaixa", idFaixa)
+    .getResultList();
+}
 
-    // album da faixa
+
+    // Album da faixa
     public Object findAlbumByFaixaId(Long idFaixa) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT a FROM Album a
-                JOIN a.faixas f
-                WHERE f.id = :idFaixa
-            """)
-            .setParameter("idFaixa", idFaixa)
-            .getSingleResult();
+        return find("id = ?1", idFaixa).firstResult().getAlbum();
     }
 
-    // buscar faixas de um artista (como compositor)
-    public List<Faixa> findByArtistaCompositorId(Long idArtista) {
-        return find("""
+    // Faixas compostas por determinado projeto musical (compositor)
+    public List<Faixa> findByArtistaCompositorId(Long idProjetoMusical) {
+        return getEntityManager().createQuery("""
             SELECT DISTINCT f FROM Faixa f
             JOIN f.composicao c
-            JOIN c.artista a
-            WHERE a.id = ?1
-        """, idArtista).list();
+            JOIN c.projetoMusical cp
+            WHERE cp.id = :idProjeto
+        """, Faixa.class)
+        .setParameter("idProjeto", idProjetoMusical)
+        .getResultList();
     }
 
-    // buscar faixas por tipo de versão (enum TipoVersao)
-    public List<Faixa> findByTipoVersao(Enum<?> tipoVersao) {
+    // Tipo de versão (enum)
+    public List<Faixa> findByTipoVersao(TipoVersao tipoVersao) {
         return find("tipoVersao = ?1", tipoVersao).list();
     }
 
-    // buscar composição associada à faixa
+    // Composicao da faixa (unidirecional)
     public Object findComposicaoByFaixaId(Long idFaixa) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT c FROM Composicao c
-                JOIN c.faixa f
-                WHERE f.id = :idFaixa
-            """)
-            .setParameter("idFaixa", idFaixa)
-            .getSingleResult();
+        return getEntityManager().createQuery("""
+            SELECT c FROM Faixa f
+            JOIN f.composicao c
+            WHERE f.id = :idFaixa
+        """)
+        .setParameter("idFaixa", idFaixa)
+        .getSingleResult();
     }
 
     public List<Faixa> findByGeneroId(Long idGenero) {
-        return find("""
-            SELECT f FROM Faixa f
-            JOIN f.genero g
-            WHERE g.id = ?1
-        """, idGenero).list();
+        return find("genero.id = ?1", idGenero).list();
     }
 
     public List<Faixa> findByIdioma(String idioma) {

@@ -3,8 +3,10 @@ package topicosAlbum.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
@@ -25,22 +27,33 @@ public class Faixa extends DefaultEntity {
      * no entanto, deixarei apenas como comentário caso seja necessário alterar futuramente
     */
 
-    @OneToMany // (cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "idParticipacao") 
-    private List<Participacao> participacao = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "idFaixa") // FK em participacao
+    private List<Participacao> participacoes = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idComposicao")
     private Composicao composicao;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "idGenero")
     private Genero genero;
 
-    // enum
+    @ManyToOne
+    @JoinColumn(name = "idAlbum")
+    private Album album;
+
+    /*enum */
     private TipoVersao tipoVersao;
 
     
+    public Album getAlbum() {
+    return album;
+}
+
+public void setAlbum(Album album) {
+    this.album = album;
+}
 
     public String getTitulo() {
         return titulo;
@@ -74,13 +87,6 @@ public class Faixa extends DefaultEntity {
         this.idioma = idioma;
     }
 
-    public List<Participacao> getParticipacao() {
-        return participacao;
-    }
-
-    public void setParticipacao(List<Participacao> participacao) {
-        this.participacao = participacao;
-    }
 
     public Composicao getComposicao() {
         return composicao;
@@ -104,6 +110,14 @@ public class Faixa extends DefaultEntity {
 
     public void setTipoVersao(TipoVersao tipoVersao) {
         this.tipoVersao = tipoVersao;
+    }
+
+    public List<Participacao> getParticipacoes() {
+        return participacoes;
+    }
+
+    public void setParticipacoes(List<Participacao> participacoes) {
+        this.participacoes = participacoes;
     }
 
    

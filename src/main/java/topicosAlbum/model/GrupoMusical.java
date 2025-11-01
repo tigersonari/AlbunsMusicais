@@ -4,9 +4,7 @@ package topicosAlbum.model;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -18,7 +16,7 @@ public class GrupoMusical extends ProjetoMusical {
     private LocalDate dataInicio;
     private LocalDate dataTermino;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany /*(fetch = FetchType.LAZY, cascade = CascadeType.ALL)*/
     @JoinTable(
         name = "grupo_musical_artista",
         joinColumns = @JoinColumn(name = "idGrupo"),
