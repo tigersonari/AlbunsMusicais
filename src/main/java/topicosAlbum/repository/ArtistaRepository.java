@@ -1,6 +1,5 @@
 package topicosAlbum.repository;
 
-
 import java.util.List;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
@@ -35,71 +34,44 @@ public class ArtistaRepository implements PanacheRepository<Artista> {
     }
 
     // grupos musicais que o artista integra
-   public List<GrupoMusical> findGruposByArtistaId(Long idArtista) {
-    return getEntityManager()
-        .createQuery("""
-            SELECT DISTINCT g FROM GrupoMusical g
-            JOIN g.membros m
-            WHERE m.id = :idArtista
-        """, GrupoMusical.class)
-        .setParameter("idArtista", idArtista)
-        .getResultList();
-}
+    public List<GrupoMusical> findGruposByArtistaId(Long idArtista) {
+        return getEntityManager()
+            .createQuery("""
+                SELECT DISTINCT g FROM GrupoMusical g
+                JOIN g.membros m
+                WHERE m.id = :idArtista
+            """, GrupoMusical.class)
+            .setParameter("idArtista", idArtista)
+            .getResultList();
+    }
 
-
-    // albuns do artista (como principal)
+    // álbuns do artista (como principal)
     public List<Album> findAlbunsPrincipaisByArtistaId(Long idArtista) {
         return getEntityManager()
             .createQuery("""
                 SELECT DISTINCT a FROM Album a
                 JOIN a.projetoMusical p
                 WHERE p.id = :idArtista
-            """)
+            """, Album.class)
             .setParameter("idArtista", idArtista)
             .getResultList();
     }
 
-    // albuns em que o artista participa (feats, apoio, etc.)
+    // álbuns em que o artista participa (feats, apoio, etc.)
     public List<Album> findAlbunsComParticipacaoByArtistaId(Long idArtista) {
         return getEntityManager()
             .createQuery("""
-                SELECT DISTINCT a FROM Album a
-                JOIN a.faixas f
+                SELECT DISTINCT f.album FROM Faixa f
                 JOIN f.participacoes p
                 JOIN p.projetoMusical pm
                 WHERE pm.id = :idArtista
-            """)
+            """, Album.class)
             .setParameter("idArtista", idArtista)
             .getResultList();
     }
 
-    // faixas com participação do artista
-    public List<Faixa> findFaixasParticipadasByArtistaId(Long idArtista) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT DISTINCT f FROM Faixa f
-                JOIN f.participacoes p
-                JOIN p.projetoMusical pm
-                WHERE pm.id = :idArtista
-            """)
-            .setParameter("idArtista", idArtista)
-            .getResultList();
-    }
-
-    // composições criadas pelo artista (como compositor/letrista)
-    public List<Composicao> findComposicoesByArtistaId(Long idArtista) {
-        return getEntityManager()
-            .createQuery("""
-                SELECT DISTINCT c FROM Composicao c
-                JOIN c.artista a
-                WHERE a.id = :idArtista
-            """)
-            .setParameter("idArtista", idArtista)
-            .getResultList();
-    }
-
-    // todas as faixas relacionadas ao artista (como principal ou colaborador)
-    public List<?> findTodasFaixasRelacionadas(Long idArtista) {
+    // faixas relacionadas ao artista via álbum principal ou participação
+    public List<Faixa> findTodasFaixasRelacionadas(Long idArtista) {
         return getEntityManager()
             .createQuery("""
                 SELECT DISTINCT f FROM Faixa f
@@ -114,7 +86,19 @@ public class ArtistaRepository implements PanacheRepository<Artista> {
                     JOIN p2.projetoMusical pm
                     WHERE pm.id = :idArtista
                 )
-            """)
+            """, Faixa.class)
+            .setParameter("idArtista", idArtista)
+            .getResultList();
+    }
+
+    // composições criadas pelo artista
+    public List<Composicao> findComposicoesByArtistaId(Long idArtista) {
+        return getEntityManager()
+            .createQuery("""
+                SELECT DISTINCT c FROM Composicao c
+                JOIN c.projetoMusical pm
+                WHERE pm.id = :idArtista
+            """, Composicao.class)
             .setParameter("idArtista", idArtista)
             .getResultList();
     }

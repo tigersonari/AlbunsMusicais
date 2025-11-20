@@ -3,12 +3,12 @@ package topicosAlbum.service;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import topicosAlbum.dto.AlbumResponseDTO;
 import topicosAlbum.dto.ArtistaDTO;
 import topicosAlbum.dto.ArtistaResponseDTO;
-import topicosAlbum.dto.AlbumResponseDTO;
-import topicosAlbum.dto.GrupoMusicalResponseDTO;
-import topicosAlbum.dto.FaixaResponseDTO;
 import topicosAlbum.dto.ComposicaoResponseDTO;
+import topicosAlbum.dto.FaixaResponseDTO;
+import topicosAlbum.dto.GrupoMusicalResponseDTO;
 
 public interface ArtistaService {
 
@@ -27,7 +27,6 @@ public interface ArtistaService {
     List<GrupoMusicalResponseDTO> findGruposByArtistaId(Long idArtista);
     List<AlbumResponseDTO> findAlbunsPrincipaisByArtistaId(Long idArtista);
     List<AlbumResponseDTO> findAlbunsComParticipacaoByArtistaId(Long idArtista);
-    List<FaixaResponseDTO> findFaixasParticipadasByArtistaId(Long idArtista);
     List<ComposicaoResponseDTO> findComposicoesByArtistaId(Long idArtista);
     List<FaixaResponseDTO> findTodasFaixasRelacionadas(Long idArtista);
 }

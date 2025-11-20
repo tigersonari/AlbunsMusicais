@@ -70,15 +70,9 @@ public class AlbumServiceImpl implements AlbumService {
         album.setDescricao(dto.descricao());
         album.setLancamento(dto.lancamento());
 
-        // formato
-    Formato formato = null;
-    try {
-        formato = Formato.valueOf(dto.idFormato());
-        } catch (Exception e) {
-            throw ValidationException.of("formato", "Formato inválido.");
-    }
+        // Formato (enum) 
+        Formato formato = toFormato(dto.idFormato());
         album.setFormato(formato);
-
 
         // produção
         Producao p = producaoRepository.findById(dto.idProducao());
@@ -121,25 +115,15 @@ public class AlbumServiceImpl implements AlbumService {
         return albumRepository.findByAnoLancamento(ano).stream().map(AlbumResponseDTO::valueOf).toList();
     }
 
-    /* */
     @Override
-public List<AlbumResponseDTO> findByFormato(Long idFormato) {
-    Formato formato;
+    public List<AlbumResponseDTO> findByFormato(Long idFormato) {
+        Formato formato = toFormato(idFormato);
 
-    try {
-        formato = Formato.valueOf(idFormato); // converte Long → Enum
-    } catch (Exception e) {
-        throw ValidationException.of("formato", "Formato inválido.");
+        return albumRepository.findByFormato(formato)
+                .stream()
+                .map(AlbumResponseDTO::valueOf)
+                .toList();
     }
-
-    return albumRepository.find("formato", formato)
-            .list()
-            .stream()
-            .map(AlbumResponseDTO::valueOf)
-            .toList();
-}
-
-    /* */
 
     @Override
     public List<AlbumResponseDTO> findByArtistaPrincipal(Long idProjetoMusical) {
@@ -184,5 +168,20 @@ public List<AlbumResponseDTO> findByFormato(Long idFormato) {
     @Override
     public List<AlbumResponseDTO> findByFaixaTitulo(String tituloFaixa) {
         return albumRepository.findByFaixaTitulo(tituloFaixa).stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    // ---------- helper para enum ----------
+
+    private Formato toFormato(Long idFormato) {
+        if (idFormato == null)
+            throw ValidationException.of("formato", "Formato inválido.");
+
+        Formato[] values = Formato.values();
+        int index = idFormato.intValue() - 1; // assumindo IDs 1..n
+
+        if (index < 0 || index >= values.length)
+            throw ValidationException.of("formato", "Formato inválido.");
+
+        return values[index];
     }
 }

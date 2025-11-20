@@ -19,6 +19,7 @@ public class AlbumRepository implements PanacheRepository<Album> {
     }
 
     public List<Album> findByAnoLancamento(int ano) {
+       
         return find("EXTRACT(YEAR FROM lancamento) = ?1", ano).list();
     }
 
@@ -79,21 +80,27 @@ public class AlbumRepository implements PanacheRepository<Album> {
         """, idGenero).list();
     }
 
+    // corrigido: não usa mais a.faixas (não existe)
     public List<Album> findByParticipacao(Long idProjetoMusical) {
-        return find("""
-            SELECT DISTINCT a FROM Album a
-            JOIN a.faixas f
-            JOIN f.participacao part
-            WHERE part.projetoMusical.id = ?1
-        """, idProjetoMusical).list();
+        return getEntityManager()
+            .createQuery("""
+                SELECT DISTINCT f.album FROM Faixa f
+                JOIN f.participacoes part
+                JOIN part.projetoMusical pm
+                WHERE pm.id = :idProjeto
+            """, Album.class)
+            .setParameter("idProjeto", idProjetoMusical)
+            .getResultList();
     }
 
+    // corrigido: busca pelos álbuns via faixa.album
     public List<Album> findByFaixaTitulo(String tituloFaixa) {
-        return find("""
-            SELECT DISTINCT a FROM Album a
-            JOIN a.faixas f
-            WHERE LOWER(f.titulo) LIKE ?1
-        """, "%" + tituloFaixa.toLowerCase() + "%").list();
+        return getEntityManager()
+            .createQuery("""
+                SELECT DISTINCT f.album FROM Faixa f
+                WHERE LOWER(f.titulo) LIKE :titulo
+            """, Album.class)
+            .setParameter("titulo", "%" + tituloFaixa.toLowerCase() + "%")
+            .getResultList();
     }
 }
-

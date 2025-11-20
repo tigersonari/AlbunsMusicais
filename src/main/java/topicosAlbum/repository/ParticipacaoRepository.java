@@ -21,7 +21,7 @@ public class ParticipacaoRepository implements PanacheRepository<Participacao> {
             .getResultList();
     }
 
-    //  uscar participações de um artista ou grupo
+    // buscar participações de um artista ou grupo
     public List<Participacao> findByProjetoMusicalId(Long idProjeto) {
         return getEntityManager()
             .createQuery("""
@@ -42,13 +42,13 @@ public class ParticipacaoRepository implements PanacheRepository<Participacao> {
     }
 
     // buscar participações de um álbum via faixas
+    // corrigido: não usa a.faixas
     public List<Participacao> findByAlbumId(Long idAlbum) {
         return getEntityManager()
             .createQuery("""
-                SELECT DISTINCT p FROM Album a
-                JOIN a.faixas f
+                SELECT DISTINCT p FROM Faixa f
                 JOIN f.participacoes p
-                WHERE a.id = :idAlbum
+                WHERE f.album.id = :idAlbum
             """, Participacao.class)
             .setParameter("idAlbum", idAlbum)
             .getResultList();

@@ -1,6 +1,7 @@
 package topicosAlbum.repository;
 
 import java.util.List;
+
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import topicosAlbum.model.Faixa;
@@ -31,21 +32,22 @@ public class FaixaRepository implements PanacheRepository<Faixa> {
     }
 
     // Artistas principais da faixa via Album
+    // corrigido para JPQL padrão
     public List<ProjetoMusical> findArtistasPrincipaisByFaixaId(Long idFaixa) {
-    return getEntityManager().createQuery("""
-        SELECT DISTINCT pm FROM Album a
-        JOIN a.projetoMusical pm
-        JOIN Faixa f ON f.album = a
-        WHERE f.id = :idFaixa
-    """, ProjetoMusical.class)
-    .setParameter("idFaixa", idFaixa)
-    .getResultList();
-}
+        return getEntityManager().createQuery("""
+            SELECT DISTINCT pm FROM Faixa f
+            JOIN f.album a
+            JOIN a.projetoMusical pm
+            WHERE f.id = :idFaixa
+        """, ProjetoMusical.class)
+        .setParameter("idFaixa", idFaixa)
+        .getResultList();
+    }
 
-
-    // Album da faixa
+    // Album da faixa (evita NPE)
     public Object findAlbumByFaixaId(Long idFaixa) {
-        return find("id = ?1", idFaixa).firstResult().getAlbum();
+        Faixa faixa = find("id", idFaixa).firstResult();
+        return faixa != null ? faixa.getAlbum() : null;
     }
 
     // Faixas compostas por determinado projeto musical (compositor)

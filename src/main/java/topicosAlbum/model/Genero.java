@@ -1,9 +1,12 @@
 package topicosAlbum.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Genero extends DefaultEntity {
       
     private String nomeGenero;

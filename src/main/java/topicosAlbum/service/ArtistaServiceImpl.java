@@ -6,15 +6,16 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-
-import topicosAlbum.dto.*;
+import topicosAlbum.dto.AlbumResponseDTO;
+import topicosAlbum.dto.ArtistaDTO;
+import topicosAlbum.dto.ArtistaResponseDTO;
+import topicosAlbum.dto.ComposicaoResponseDTO;
+import topicosAlbum.dto.FaixaResponseDTO;
+import topicosAlbum.dto.GrupoMusicalResponseDTO;
 import topicosAlbum.exception.ValidationException;
 import topicosAlbum.model.Artista;
 import topicosAlbum.model.Empresa;
-import topicosAlbum.model.Album;
-import topicosAlbum.model.Composicao;
 import topicosAlbum.model.Faixa;
-import topicosAlbum.model.GrupoMusical;
 import topicosAlbum.repository.ArtistaRepository;
 import topicosAlbum.repository.EmpresaRepository;
 
@@ -106,10 +107,6 @@ public class ArtistaServiceImpl implements ArtistaService {
 
     @Override public List<AlbumResponseDTO> findAlbunsComParticipacaoByArtistaId(Long id) {
         return artistaRepository.findAlbunsComParticipacaoByArtistaId(id).stream().map(AlbumResponseDTO::valueOf).toList();
-    }
-
-    @Override public List<FaixaResponseDTO> findFaixasParticipadasByArtistaId(Long id) {
-        return artistaRepository.findFaixasParticipadasByArtistaId(id).stream().map(FaixaResponseDTO::valueOf).toList();
     }
 
     @Override public List<ComposicaoResponseDTO> findComposicoesByArtistaId(Long id) {

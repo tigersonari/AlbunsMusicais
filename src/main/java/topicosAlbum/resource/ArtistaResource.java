@@ -110,11 +110,6 @@ public class ArtistaResource {
         return Response.ok(service.findAlbunsComParticipacaoByArtistaId(id)).build();
     }
 
-    @GET
-    @Path("/{id}/faixas")
-    public Response findFaixasParticipadas(@PathParam("id") Long id) {
-        return Response.ok(service.findFaixasParticipadasByArtistaId(id)).build();
-    }
 
     @GET
     @Path("/{id}/faixas/todas")

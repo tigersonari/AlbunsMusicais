@@ -52,13 +52,12 @@ public class FaixaServiceImpl implements FaixaService {
     }
 
     @Override
-public List<FaixaResponseDTO> findByArtistaParticipante(Long idProjeto) {
-    return faixaRepository.findByParticipacaoArtistaId(idProjeto)
-            .stream()
-            .map(FaixaResponseDTO::valueOf)
-            .toList();
-}
-
+    public List<FaixaResponseDTO> findByArtistaParticipante(Long idProjeto) {
+        return faixaRepository.findByParticipacaoArtistaId(idProjeto)
+                .stream()
+                .map(FaixaResponseDTO::valueOf)
+                .toList();
+    }
 
     @Override
     public List<FaixaResponseDTO> findByCompositor(Long idProjeto) {
@@ -78,24 +77,15 @@ public List<FaixaResponseDTO> findByArtistaParticipante(Long idProjeto) {
                 .stream().map(FaixaResponseDTO::valueOf).toList();
     }
 
-    /* */
-     @Override
+    @Override
     public List<FaixaResponseDTO> findByTipoVersao(Long idTipoVersao) {
-    TipoVersao tipoVersao;
+        TipoVersao tipoVersao = toTipoVersao(idTipoVersao);
 
-    try {
-        tipoVersao = TipoVersao.valueOf(idTipoVersao); // converte Long → Enum
-    } catch (Exception e) {
-        throw ValidationException.of("tipoVersao", "TipoVersao inválido.");
+        return faixaRepository.findByTipoVersao(tipoVersao)
+                .stream()
+                .map(FaixaResponseDTO::valueOf)
+                .toList();
     }
-
-    return faixaRepository.find("tipoVersao", tipoVersao)
-            .list()
-            .stream()
-            .map(FaixaResponseDTO::valueOf)
-            .toList();
-}
-    /* */
 
     @Override
     @Transactional
@@ -121,16 +111,9 @@ public List<FaixaResponseDTO> findByArtistaParticipante(Long idProjeto) {
         f.setDuracao(dto.duracao());
         f.setIdioma(dto.idioma());
 
-        // formato
-        TipoVersao tipoVersao = null;
-            try {
-             tipoVersao = TipoVersao.valueOf(dto.idTipoVersao());
-                } catch (Exception e) {
-                    throw ValidationException.of("tipoVersao", "TipoVersao inválido.");
-        }
+        // TipoVersao (enum) 
+        TipoVersao tipoVersao = toTipoVersao(dto.idTipoVersao());
         f.setTipoVersao(tipoVersao);
-
-
 
         Album album = albumRepository.findById(dto.idAlbum());
         if (album == null)
@@ -153,5 +136,20 @@ public List<FaixaResponseDTO> findByArtistaParticipante(Long idProjeto) {
     public void delete(Long id) {
         if (!faixaRepository.deleteById(id))
             throw ValidationException.of("id", "Faixa não encontrada.");
+    }
+
+    // ---------- helper para enum ----------
+
+    private TipoVersao toTipoVersao(Long idTipoVersao) {
+        if (idTipoVersao == null)
+            throw ValidationException.of("tipoVersao", "TipoVersao inválido.");
+
+        TipoVersao[] values = TipoVersao.values();
+        int index = idTipoVersao.intValue() - 1; // assumindo IDs 1..n
+
+        if (index < 0 || index >= values.length)
+            throw ValidationException.of("tipoVersao", "TipoVersao inválido.");
+
+        return values[index];
     }
 }

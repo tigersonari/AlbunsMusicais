@@ -18,7 +18,6 @@ public class GrupoMusicalRepository implements PanacheRepository<GrupoMusical> {
     }
 
     public List<GrupoMusical> findByEmpresaId(Long idEmpresa) {
-        // Panache aceita "propriedade" = ?1 implicitamente
         return find("empresa.id", idEmpresa).list();
     }
 
@@ -42,11 +41,12 @@ public class GrupoMusicalRepository implements PanacheRepository<GrupoMusical> {
     }
 
     // FAIXAS "do grupo" = faixas de álbuns cujo projetoMusical é o próprio grupo
+    // corrigido: não usa a.faixas
     public List<Faixa> findFaixasByGrupoId(Long idGrupo) {
         return getEntityManager()
             .createQuery("""
-                SELECT DISTINCT f FROM Album a
-                JOIN a.faixas f
+                SELECT DISTINCT f FROM Faixa f
+                JOIN f.album a
                 JOIN a.projetoMusical p
                 WHERE p.id = :idGrupo
             """, Faixa.class)
@@ -66,11 +66,11 @@ public class GrupoMusicalRepository implements PanacheRepository<GrupoMusical> {
     }
 
     // álbuns onde o grupo participou (feat/apoio) via participações nas faixas
+    // corrigido: não usa a.faixas
     public List<Album> findAlbunsComParticipacaoByGrupoId(Long idGrupo) {
         return getEntityManager()
             .createQuery("""
-                SELECT DISTINCT a FROM Album a
-                JOIN a.faixas f
+                SELECT DISTINCT f.album FROM Faixa f
                 JOIN f.participacoes part
                 JOIN part.projetoMusical pm
                 WHERE pm.id = :idGrupo
