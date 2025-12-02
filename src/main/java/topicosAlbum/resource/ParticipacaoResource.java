@@ -1,5 +1,6 @@
 package topicosAlbum.resource;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -24,51 +25,69 @@ public class ParticipacaoResource {
     @Inject ParticipacaoService service;
 
     @GET
-    public Response findAll() { return Response.ok(service.findAll()).build(); }
+    @RolesAllowed({"ADM", "USER"})
+    public Response findAll() { 
+        return Response.ok(service.findAll()).build(); }
 
     @GET @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response findById(@PathParam("id") Long id) {
         return Response.ok(service.findById(id)).build();
     }
 
     @POST
+    @RolesAllowed("ADM")
     public Response create(@Valid ParticipacaoDTO dto) {
         return Response.status(Status.CREATED).entity(service.create(dto)).build();
     }
 
-    @PUT @Path("/{id}")
+    @PUT 
+    @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, @Valid ParticipacaoDTO dto) {
         service.update(id, dto);
         return Response.noContent().build();
     }
 
-    @DELETE @Path("/{id}")
+    @DELETE 
+    @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
         service.delete(id);
         return Response.noContent().build();
     }
 
-    @GET @Path("/faixa/{idFaixa}")
+    @GET 
+    @Path("/faixa/{idFaixa}")
+    @RolesAllowed({"ADM", "USER"})
     public Response findByFaixa(@PathParam("idFaixa") Long idFaixa) {
         return Response.ok(service.findByFaixaId(idFaixa)).build();
     }
 
-    @GET @Path("/projeto/{idProjetoMusical}")
+    @GET 
+    @Path("/projeto/{idProjetoMusical}")
+    @RolesAllowed({"ADM", "USER"})
     public Response findByProjeto(@PathParam("idProjetoMusical") Long idProjetoMusical) {
         return Response.ok(service.findByProjetoMusicalId(idProjetoMusical)).build();
     }
 
-    @GET @Path("/papel/{papel}")
+    @GET 
+    @Path("/papel/{papel}")
+    @RolesAllowed({"ADM", "USER"})
     public Response findByPapel(@PathParam("papel") String papel) {
         return Response.ok(service.findByPapel(papel)).build();
     }
 
-    @GET @Path("/destaque")
+    @GET 
+    @Path("/destaque")
+    @RolesAllowed({"ADM", "USER"})
     public Response principais() {
         return Response.ok(service.findPrincipais()).build();
     }
 
-    @GET @Path("/album/{idAlbum}")
+    @GET 
+    @Path("/album/{idAlbum}")
+    @RolesAllowed({"ADM", "USER"})
     public Response findByAlbum(@PathParam("idAlbum") Long idAlbum) {
         return Response.ok(service.findByAlbumId(idAlbum)).build();
     }

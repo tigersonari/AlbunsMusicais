@@ -1,5 +1,6 @@
 package topicosAlbum.resource;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -28,17 +29,20 @@ public class AlbumResource {
     //crud
 
     @GET
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarTodos() {
         return Response.ok(service.findAll()).build();
     }
 
     @GET
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response buscarPorId(@PathParam("id") Long id) {
         return Response.ok(service.findById(id)).build();
     }
 
     @POST
+    @RolesAllowed("ADM")
     public Response incluir(@Valid AlbumDTO dto) {
         return Response
             .status(Status.CREATED)
@@ -48,6 +52,7 @@ public class AlbumResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response alterar(@PathParam("id") Long id, @Valid AlbumDTO dto) {
         service.update(id, dto);
         return Response.noContent().build();
@@ -55,6 +60,7 @@ public class AlbumResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response apagar(@PathParam("id") Long id) {
         service.delete(id);
         return Response.noContent().build();
@@ -63,18 +69,21 @@ public class AlbumResource {
     // query
     @GET
     @Path("/find/titulo/{titulo}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorTitulo(@PathParam("titulo") String titulo) {
         return Response.ok(service.findByTitulo(titulo)).build();
     }
 
     @GET
     @Path("/find/ano/{ano}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorAnoLancamento(@PathParam("ano") int ano) {
         return Response.ok(service.findByAnoLancamento(ano)).build();
     }
 
     @GET
     @Path("/find/formato/{idFormato}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorFormato(@PathParam("idFormato") Long idFormato) {
         return Response.ok(service.findByFormato(idFormato)).build();
     }
@@ -82,12 +91,14 @@ public class AlbumResource {
 
    @GET
 @Path("/find/projeto/{idProjetoMusical}")
+@RolesAllowed({"ADM", "USER"})
 public Response buscarPorArtistaPrincipal(@PathParam("idProjetoMusical") Long idProjetoMusical) {
     return Response.ok(service.findByArtistaPrincipal(idProjetoMusical)).build();
 }
 
 @GET
 @Path("/find/participacao/{idProjetoMusical}")
+@RolesAllowed({"ADM", "USER"})
 public Response buscarPorParticipacao(@PathParam("idProjetoMusical") Long idProjetoMusical) {
     return Response.ok(service.findByParticipacao(idProjetoMusical)).build();
 }
@@ -95,6 +106,7 @@ public Response buscarPorParticipacao(@PathParam("idProjetoMusical") Long idProj
 
     @GET
     @Path("/find/colaboracao")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarColaboracoesEntre(
         @QueryParam("idArtista1") Long id1,
         @QueryParam("idArtista2") Long id2) {
@@ -103,36 +115,42 @@ public Response buscarPorParticipacao(@PathParam("idProjetoMusical") Long idProj
 
     @GET
     @Path("/find/producao/empresa/{idEmpresa}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorEmpresaProducao(@PathParam("idEmpresa") Long idEmpresa) {
         return Response.ok(service.findByEmpresaProducao(idEmpresa)).build();
     }
 
     @GET
     @Path("/find/produtor/{nome}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorProdutor(@PathParam("nome") String nome) {
         return Response.ok(service.findByProdutor(nome)).build();
     }
 
     @GET
     @Path("/find/mixagem/{nome}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorEngMixagem(@PathParam("nome") String nome) {
         return Response.ok(service.findByEngenheiroMixagem(nome)).build();
     }
 
     @GET
     @Path("/find/masterizacao/{nome}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorEngMasterizacao(@PathParam("nome") String nome) {
         return Response.ok(service.findByEngenheiroMasterizacao(nome)).build();
     }
 
     @GET
     @Path("/find/genero/{idGenero}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorGenero(@PathParam("idGenero") Long idGenero) {
         return Response.ok(service.findByGenero(idGenero)).build();
     }
 
     @GET
     @Path("/find/faixa/{tituloFaixa}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorTituloFaixa(@PathParam("tituloFaixa") String tituloFaixa) {
         return Response.ok(service.findByFaixaTitulo(tituloFaixa)).build();
     }

@@ -35,22 +35,29 @@ public class AvaliacaoProfissionalServiceImpl implements AvaliacaoProfissionalSe
     }
 
     @Override
-    @Transactional
-    public AvaliacaoProfissionalResponseDTO create(AvaliacaoProfissionalDTO dto) {
-        Album album = albumRepo.findById(dto.idAlbum());
-        if (album == null)
-            throw ValidationException.of("album", "Álbum não encontrado.");
+@Transactional
+public AvaliacaoProfissionalResponseDTO create(AvaliacaoProfissionalDTO dto) {
+    Album album = albumRepo.findById(dto.idAlbum());
+    if (album == null)
+        throw ValidationException.of("album", "Álbum não encontrado.");
 
-        AvaliacaoProfissional a = new AvaliacaoProfissional();
-        a.setAvaliador(dto.avaliador());
-        a.setComentario(dto.comentario());
-        a.setNota(dto.nota());
+    AvaliacaoProfissional a = new AvaliacaoProfissional();
+    a.setAvaliador(dto.avaliador());
+    a.setComentario(dto.comentario());
+    a.setNota(dto.nota());
 
-        album.getAvaliacaoProfissional().add(a); // <- unidirecional, album conhece avaliação
-        albumRepo.persist(album);
+    // 1) Persiste a avaliação para garantir que o ID seja gerado
+    repo.persist(a);
+    repo.flush(); // garante que o insert rode antes de montar o DTO (opcional, mas ajuda)
 
-        return AvaliacaoProfissionalResponseDTO.valueOf(a, album);
-    }
+    // 2) Relaciona com o álbum (lista unidirecional)
+    album.getAvaliacaoProfissional().add(a);
+    // album já está gerenciado, não precisa chamar persist de novo
+
+    // 3) Agora o 'a.getId()' NÃO é mais null
+    return AvaliacaoProfissionalResponseDTO.valueOf(a, album);
+}
+
 
     @Override
     @Transactional

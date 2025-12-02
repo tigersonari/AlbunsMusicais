@@ -1,5 +1,6 @@
 package topicosAlbum.resource;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -25,36 +26,42 @@ public class GeneroResource {
     GeneroService service;
 
     @GET
+    @RolesAllowed({"ADM", "USER"})
     public Response findAll() {
         return Response.ok(service.findAll()).build();
     }
 
     @GET
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response findById(@PathParam("id") Long id) {
         return Response.ok(service.findById(id)).build();
     }
 
     @GET
     @Path("/search/{nomeGenero}")
+    @RolesAllowed({"ADM", "USER"})
     public Response findByNome(@PathParam("nomeGenero") String nomeGenero) {
         return Response.ok(service.findByNome(nomeGenero)).build();
     }
 
     @GET
     @Path("/album/{idAlbum}")
+    @RolesAllowed({"ADM", "USER"})
     public Response findByAlbum(@PathParam("idAlbum") Long idAlbum) {
         return Response.ok(service.findByAlbum(idAlbum)).build();
     } /*verificar */
 
 
     @POST
+    @RolesAllowed("ADM")
     public Response create(@Valid GeneroDTO dto) {
         return Response.status(Status.CREATED).entity(service.create(dto)).build();
     }
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, @Valid GeneroDTO dto) {
         service.update(id, dto);
         return Response.noContent().build();
@@ -62,6 +69,7 @@ public class GeneroResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
         service.delete(id);
         return Response.noContent().build();

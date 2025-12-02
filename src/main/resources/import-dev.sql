@@ -144,14 +144,31 @@ UPDATE avaliacaoprofissional SET idalbum = 1 WHERE id IN (1, 2);
 UPDATE avaliacaoprofissional SET idalbum = 2 WHERE id IN (3, 4);
 
 -- =========================
+-- USUÁRIOS DO SISTEMA (AUTH)
+-- =========================
+-- senha em texto plano: 123456
+-- hash gerado com PBKDF2WithHmacSHA512, salt "#$127732&", iterationCount=403, keyLength=512
+INSERT INTO usuario (id, nome, login, senha, perfil, datacadastro, dataalteracao)
+VALUES
+    (1, 'Maximoff',  'admin',
+     '+RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==',
+     1,  -- Perfil.ADM 
+     now(), now()),
+    (2, 'Hirai',    'user',
+     '+RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==',
+     2,  -- Perfil.USER
+     now(), now());
+
+
+-- =========================
 -- AJUSTE DAS SEQUENCES (PostgreSQL)
 -- =========================
--- Isso garante que os próximos INSERTs automáticos (via JPA) não reutilizem IDs já usados.
+--  garante que os próximos INSERTs automáticos (via JPA) não reutilizem IDs já usados.
 
 SELECT setval('empresa_id_seq',               (SELECT COALESCE(MAX(id), 0) FROM empresa));
 SELECT setval('projetomusical_id_seq',        (SELECT COALESCE(MAX(id), 0) FROM projetomusical));
-SELECT setval('artista_id_seq',               (SELECT COALESCE(MAX(id), 0) FROM artista));
-SELECT setval('grupomusical_id_seq',          (SELECT COALESCE(MAX(id), 0) FROM grupomusical));
+-- SELECT setval('artista_id_seq',               (SELECT COALESCE(MAX(id), 0) FROM artista));
+-- SELECT setval('grupomusical_id_seq',          (SELECT COALESCE(MAX(id), 0) FROM grupomusical));
 SELECT setval('genero_id_seq',                (SELECT COALESCE(MAX(id), 0) FROM genero));
 SELECT setval('producao_id_seq',              (SELECT COALESCE(MAX(id), 0) FROM producao));
 SELECT setval('album_id_seq',                 (SELECT COALESCE(MAX(id), 0) FROM album));
@@ -159,3 +176,5 @@ SELECT setval('composicao_id_seq',            (SELECT COALESCE(MAX(id), 0) FROM 
 SELECT setval('faixa_id_seq',                 (SELECT COALESCE(MAX(id), 0) FROM faixa));
 SELECT setval('participacao_id_seq',          (SELECT COALESCE(MAX(id), 0) FROM participacao));
 SELECT setval('avaliacaoprofissional_id_seq', (SELECT COALESCE(MAX(id), 0) FROM avaliacaoprofissional));
+-- SELECT setval('usuario_id_seq', (SELECT COALESCE(MAX(id), 0) FROM usuario));
+

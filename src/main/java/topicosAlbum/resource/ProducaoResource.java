@@ -2,6 +2,7 @@ package topicosAlbum.resource;
 
 import java.time.LocalDate;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -28,17 +29,20 @@ public class ProducaoResource {
     ProducaoService service;
 
     @GET
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarTodos() {
         return Response.ok(service.findAll()).build();
     }
 
     @GET
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response buscarPorId(@PathParam("id") Long id) {
         return Response.ok(service.findById(id)).build();
     }
 
     @POST
+    @RolesAllowed("ADM")
     public Response incluir(@Valid ProducaoDTO dto) {
         return Response.status(Status.CREATED)
                 .entity(service.create(dto))
@@ -47,6 +51,7 @@ public class ProducaoResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response alterar(@PathParam("id") Long id, @Valid ProducaoDTO dto) {
         service.update(id, dto);
         return Response.noContent().build();
@@ -54,6 +59,7 @@ public class ProducaoResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("ADM")
     public Response apagar(@PathParam("id") Long id) {
         service.delete(id);
         return Response.noContent().build();
@@ -63,36 +69,42 @@ public class ProducaoResource {
 
     @GET
     @Path("/find/produtor/{nome}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorProdutor(@PathParam("nome") String nome) {
         return Response.ok(service.findByProdutor(nome)).build();
     }
 
     @GET
     @Path("/find/gravacao/{nome}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorEngGravacao(@PathParam("nome") String nome) {
         return Response.ok(service.findByEngenheiroGravacao(nome)).build();
     }
 
     @GET
     @Path("/find/mixagem/{nome}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorMixagem(@PathParam("nome") String nome) {
         return Response.ok(service.findByEngenheiroMixagem(nome)).build();
     }
 
     @GET
     @Path("/find/masterizacao/{nome}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorMasterizacao(@PathParam("nome") String nome) {
         return Response.ok(service.findByEngenheiroMasterizacao(nome)).build();
     }
 
     @GET
     @Path("/find/data/{data}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorDataProducao(@PathParam("data") String data) {
         return Response.ok(service.findByDataProducao(LocalDate.parse(data))).build();
     }
 
     @GET
     @Path("/find/periodo")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorPeriodoProducao(
         @QueryParam("inicio") String inicio,
         @QueryParam("fim") String fim
@@ -105,12 +117,14 @@ public class ProducaoResource {
 
     @GET
     @Path("/find/empresa/{idEmpresa}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorEmpresa(@PathParam("idEmpresa") Long idEmpresa) {
         return Response.ok(service.findByEmpresa(idEmpresa)).build();
     }
 
     @GET
     @Path("/find/album/{idAlbum}")
+    @RolesAllowed({"ADM", "USER"})
     public Response buscarPorAlbum(@PathParam("idAlbum") Long idAlbum) {
         return Response.ok(service.findByAlbum(idAlbum)).build();
     }
