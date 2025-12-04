@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.AlbumDTO;
 import topicosAlbum.dto.AlbumResponseDTO;
@@ -97,12 +98,21 @@ class AlbumResourceTest {
         return albumService.create(dto);
     }
 
+    /**
+     * Helper para obter um RequestSpecification com o header Authorization já aplicado.
+     * Usa a sua classe TokenUtils (que você disse que já criou na pasta de testes).
+     */
+    private RequestSpecification admin() {
+        String token = TokenUtils.getAdminToken();
+        return given().header("Authorization", "Bearer " + token);
+    }
+
     // --------------- CRUD BÁSICO ---------------
 
     @Test
     @DisplayName("GET /albums - deve retornar 200")
     void buscarTodosAlbuns_deveRetornar200() {
-        given()
+        admin()
             .when()
                 .get("/albums")
             .then()
@@ -125,7 +135,7 @@ class AlbumResourceTest {
             List.of(1L, 3L)              // K-Pop, Pop
         );
 
-        given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -155,7 +165,7 @@ class AlbumResourceTest {
             List.of(1L, 2L)                 // K-Pop + Hip-Hop
         );
 
-        given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -175,7 +185,7 @@ class AlbumResourceTest {
     void apagarAlbum_deveRemoverComSucesso() {
         AlbumResponseDTO criado = criarAlbumParaTeste();
 
-        given()
+        admin()
             .when()
                 .delete("/albums/" + criado.id())
             .then()
@@ -192,7 +202,7 @@ class AlbumResourceTest {
     @DisplayName("GET /albums/{id} - deve retornar álbum existente (id=1)")
     void buscarPorId_deveRetornarAlbumExistente() {
         // import-dev.sql: album id=1 → "MAP OF THE SOUL: 7", formato LONGPLAY (5)
-        given()
+        admin()
             .when()
                 .get("/albums/1")
             .then()
@@ -205,7 +215,7 @@ class AlbumResourceTest {
     @Test
     @DisplayName("GET /albums/find/titulo/{titulo} - deve retornar álbuns por título")
     void buscarPorTitulo_deveRetornarAlbunsPorTitulo() {
-        given()
+        admin()
             .when()
                 .get("/albums/find/titulo/MAP OF THE SOUL")
             .then()
@@ -218,7 +228,7 @@ class AlbumResourceTest {
     @DisplayName("GET /albums/find/ano/{ano} - deve retornar álbuns do ano de lançamento")
     void buscarPorAnoLancamento_deveRetornarAlbunsDoAno() {
         // import-dev: 2020 → MAP OF THE SOUL: 7, 2021 → Taste of Love
-        given()
+        admin()
             .when()
                 .get("/albums/find/ano/2020")
             .then()
@@ -226,7 +236,7 @@ class AlbumResourceTest {
                 .body("size()", greaterThanOrEqualTo(1),
                       "[0].titulo", containsString("MAP OF THE SOUL"));
 
-        given()
+        admin()
             .when()
                 .get("/albums/find/ano/2021")
             .then()
@@ -237,7 +247,7 @@ class AlbumResourceTest {
     @Test
     @DisplayName("GET /albums/find/formato/{idFormato} - deve retornar álbuns por formato (LONGPLAY)")
     void buscarPorFormato_deveRetornarAlbunsPorFormato() {
-        given()
+        admin()
             .when()
                 .get("/albums/find/formato/" + Formato.LONGPLAY.ID)
             .then()
@@ -249,7 +259,7 @@ class AlbumResourceTest {
     @DisplayName("GET /albums/find/projeto/{idProjetoMusical} - deve retornar álbuns do projeto principal (BTS)")
     void buscarPorArtistaPrincipal_deveRetornarAlbunsDoProjeto() {
         // projeto 4 = BTS, principal em MAP OF THE SOUL: 7
-        given()
+        admin()
             .when()
                 .get("/albums/find/projeto/4")
             .then()
@@ -262,7 +272,7 @@ class AlbumResourceTest {
     @DisplayName("GET /albums/find/participacao/{idProjetoMusical} - deve retornar álbuns com participação do projeto")
     void buscarPorParticipacao_deveRetornarAlbunsComParticipacao() {
         // projeto 7 = Justin Bieber, participa na faixa 4 do álbum 2
-        given()
+        admin()
             .when()
                 .get("/albums/find/participacao/7")
             .then()
@@ -272,28 +282,27 @@ class AlbumResourceTest {
     }
 
     @Test
-@DisplayName("GET /albums/find/colaboracao - deve responder 200 mesmo sem colaborações cadastradas")
-void buscarColaboracoesEntre_deveRetornar200MesmoSemResultados() {
-    given()
-        .when()
-            .get("/albums/find/colaboracao?idArtista1=5&idArtista2=7")
-        .then()
-            .statusCode(200);
-}
-
+    @DisplayName("GET /albums/find/colaboracao - deve responder 200 mesmo sem colaborações cadastradas")
+    void buscarColaboracoesEntre_deveRetornar200MesmoSemResultados() {
+        admin()
+            .when()
+                .get("/albums/find/colaboracao?idArtista1=5&idArtista2=7")
+            .then()
+                .statusCode(200);
+    }
 
     @Test
     @DisplayName("GET /albums/find/producao/empresa/{idEmpresa} - deve retornar álbuns produzidos pela empresa")
     void buscarPorEmpresaProducao_deveRetornarAlbunsDaEmpresa() {
         // empresa 1 produz álbum 1, empresa 3 produz álbum 2
-        given()
+        admin()
             .when()
                 .get("/albums/find/producao/empresa/1")
             .then()
                 .statusCode(200)
                 .body("titulo", hasItem("MAP OF THE SOUL: 7"));
 
-        given()
+        admin()
             .when()
                 .get("/albums/find/producao/empresa/3")
             .then()
@@ -304,7 +313,7 @@ void buscarColaboracoesEntre_deveRetornar200MesmoSemResultados() {
     @Test
     @DisplayName("GET /albums/find/produtor/{nome} - deve retornar álbuns de determinado produtor")
     void buscarPorProdutor_deveRetornarAlbunsDoProdutor() {
-        given()
+        admin()
             .when()
                 .get("/albums/find/produtor/Suga")
             .then()
@@ -315,7 +324,7 @@ void buscarColaboracoesEntre_deveRetornar200MesmoSemResultados() {
     @Test
     @DisplayName("GET /albums/find/mixagem/{nome} - deve retornar álbuns por engenheiro de mixagem")
     void buscarPorEngMixagem_deveRetornarAlbunsPorEngMix() {
-        given()
+        admin()
             .when()
                 .get("/albums/find/mixagem/El Capitxn")
             .then()
@@ -326,7 +335,7 @@ void buscarColaboracoesEntre_deveRetornar200MesmoSemResultados() {
     @Test
     @DisplayName("GET /albums/find/masterizacao/{nome} - deve retornar álbuns por engenheiro de masterização")
     void buscarPorEngMasterizacao_deveRetornarAlbunsPorEngMaster() {
-        given()
+        admin()
             .when()
                 .get("/albums/find/masterizacao/JYP Studio")
             .then()
@@ -338,7 +347,7 @@ void buscarColaboracoesEntre_deveRetornar200MesmoSemResultados() {
     @DisplayName("GET /albums/find/genero/{idGenero} - deve retornar álbuns por gênero")
     void buscarPorGenero_deveRetornarAlbunsPorGenero() {
         // gênero 1 = K-Pop, ligado aos dois álbuns
-        given()
+        admin()
             .when()
                 .get("/albums/find/genero/1")
             .then()
@@ -350,7 +359,7 @@ void buscarColaboracoesEntre_deveRetornar200MesmoSemResultados() {
     @DisplayName("GET /albums/find/faixa/{tituloFaixa} - deve retornar álbum que contém a faixa")
     void buscarPorTituloFaixa_deveRetornarAlbunsQueContemFaixa() {
         // faixa "Black Swan" pertence ao álbum 1
-        given()
+        admin()
             .when()
                 .get("/albums/find/faixa/Black Swan")
             .then()

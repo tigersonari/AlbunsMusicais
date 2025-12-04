@@ -11,8 +11,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.ArtistaResponseDTO;
 import topicosAlbum.dto.ComposicaoDTO;
@@ -26,11 +27,20 @@ public class ComposicaoResourceTest {
     @Inject
     ComposicaoService composicaoService;
 
+    /**
+     * Helper que aplica o header Authorization usando a sua classe TokenUtils.
+     * Usa token admin para testes que fazem escrita.
+     */
+    private RequestSpecification admin() {
+        String token = TokenUtils.getAdminToken();
+        return RestAssured.given().header("Authorization", "Bearer " + token);
+    }
+
     // ========== CRUD BÁSICO ==========
 
     @Test
     void buscarTodos_deveRetornarListaInicial() {
-        given()
+        admin()
         .when()
             .get("/composicoes")
         .then()
@@ -41,7 +51,7 @@ public class ComposicaoResourceTest {
     @Test
     void buscarPorId_deveRetornarComposicaoDeOn() {
         // composicao 1 no import: data 2019-08-01, compositores 1 (RM) e 2 (Suga)
-        given()
+        admin()
         .when()
             .get("/composicoes/{id}", 1L)
         .then()
@@ -59,7 +69,7 @@ public class ComposicaoResourceTest {
             List.of(1L, 4L) // RM (artista) + BTS (grupo)
         );
 
-        given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -86,7 +96,7 @@ public class ComposicaoResourceTest {
             List.of(2L, 3L) // Suga e Taeyeon
         );
 
-        given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -126,14 +136,14 @@ public class ComposicaoResourceTest {
 
         ComposicaoResponseDTO criada = composicaoService.create(dto);
 
-        given()
+        admin()
         .when()
             .delete("/composicoes/{id}", criada.id())
         .then()
             .statusCode(204);
 
         // após apagar, buscar por id deve retornar 400 (ValidationException)
-        given()
+        admin()
         .when()
             .get("/composicoes/{id}", criada.id())
         .then()
@@ -145,7 +155,7 @@ public class ComposicaoResourceTest {
     @Test
     void buscarPorData_deveRetornarComposicoesNaData() {
         // import: composicao 1 => 2019-08-01
-        given()
+        admin()
         .when()
             .get("/composicoes/data/{data}", "2019-08-01")
         .then()
@@ -158,7 +168,7 @@ public class ComposicaoResourceTest {
     @Test
     void buscarPorProjetoMusical_deveRetornarComposicoesDoProjeto() {
         // import: projeto 1 (RM) participa das composicoes 1 e 2
-        given()
+        admin()
         .when()
             .get("/composicoes/projeto/{idProjeto}", 1L)
         .then()
@@ -169,7 +179,7 @@ public class ComposicaoResourceTest {
     @Test
     void buscarPorFaixa_deveRetornarComposicaoDaFaixa() {
         // import: faixa 2 = 'Black Swan' -> composicao 2 (2019-09-01)
-        given()
+        admin()
         .when()
             .get("/composicoes/faixa/{idFaixa}", 2L)
         .then()

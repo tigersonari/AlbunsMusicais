@@ -12,8 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.ParticipacaoDTO;
 import topicosAlbum.dto.ParticipacaoResponseDTO;
@@ -26,12 +27,20 @@ class ParticipacaoResourceTest {
     @Inject
     ParticipacaoService participacaoService;
 
+    // -------------------
+    // JWT helper
+    // -------------------
+    private RequestSpecification admin() {
+        return RestAssured.given()
+                .header("Authorization", "Bearer " + TokenUtils.getAdminToken());
+    }
+
     // ------------------- CRUD BÁSICO -------------------
 
     @Test
     @DisplayName("GET /participacoes - deve retornar 200")
     void buscarTodasParticipacoes_deveRetornar200() {
-        given()
+        admin()
             .when()
                 .get("/participacoes")
             .then()
@@ -48,7 +57,7 @@ class ParticipacaoResourceTest {
             List.of(3L)
         );
 
-        given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -80,7 +89,7 @@ class ParticipacaoResourceTest {
             List.of(2L) // Suga
         );
 
-        given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -107,7 +116,7 @@ class ParticipacaoResourceTest {
 
         ParticipacaoResponseDTO criada = participacaoService.create(dtoCriacao);
 
-        given()
+        admin()
             .when()
                 .delete("/participacoes/" + criada.id())
             .then()
@@ -124,7 +133,7 @@ class ParticipacaoResourceTest {
     @DisplayName("GET /participacoes/{id} - deve retornar participação existente")
     void buscarPorId_deveRetornarParticipacaoExistente() {
         // do import-dev.sql: participacao id=1, papel='Feat', destaque=false, projeto=Taeyeon (id=3)
-        given()
+        admin()
             .when()
                 .get("/participacoes/1")
             .then()
@@ -140,7 +149,7 @@ class ParticipacaoResourceTest {
     @DisplayName("GET /participacoes/faixa/{idFaixa} - deve retornar participações da faixa 2 (Black Swan)")
     void buscarPorFaixa_deveRetornarParticipacoesDaFaixa() {
         // import-dev.sql: faixa 2 = Black Swan, com participacao id=1 (Taeyeon)
-        given()
+        admin()
             .when()
                 .get("/participacoes/faixa/2")
             .then()
@@ -153,7 +162,7 @@ class ParticipacaoResourceTest {
     @Test
     @DisplayName("GET /participacoes/projeto/{idProjetoMusical} - deve retornar participações da Taeyeon (id=3)")
     void buscarPorProjeto_deveRetornarParticipacoesDoProjeto() {
-        given()
+        admin()
             .when()
                 .get("/participacoes/projeto/3")
             .then()
@@ -165,7 +174,7 @@ class ParticipacaoResourceTest {
     @Test
     @DisplayName("GET /participacoes/papel/{papel} - deve retornar participações com papel 'Feat'")
     void buscarPorPapel_deveRetornarParticipacoesComPapelFeat() {
-        given()
+        admin()
             .when()
                 .get("/participacoes/papel/Feat")
             .then()
@@ -187,7 +196,7 @@ class ParticipacaoResourceTest {
         ParticipacaoResponseDTO criada = participacaoService.create(dto);
         Long idCriada = criada.id();
 
-        given()
+        admin()
             .when()
                 .get("/participacoes/destaque")
             .then()
@@ -200,7 +209,7 @@ class ParticipacaoResourceTest {
     @DisplayName("GET /participacoes/album/{idAlbum} - deve retornar participações do álbum 2 (Twice / Justin)")
     void buscarPorAlbum_deveRetornarParticipacoesDoAlbum() {
         // import-dev.sql: album 2 tem faixa 4 com participacao id=2 (Justin Bieber)
-        given()
+        admin()
             .when()
                 .get("/participacoes/album/2")
             .then()

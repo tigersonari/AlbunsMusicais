@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.GrupoMusicalDTO;
 import topicosAlbum.dto.GrupoMusicalResponseDTO;
@@ -26,9 +27,17 @@ class GrupoMusicalResourceTest {
     @Inject
     GrupoMusicalService grupoService;
 
+    // ==========================================================
+    // JWT Helper
+    // ==========================================================
+    private RequestSpecification admin() {
+        return RestAssured.given()
+                .header("Authorization", "Bearer " + TokenUtils.getAdminToken());
+    }
+
     @Test
     void buscarTodos_deveRetornar200() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/grupos-musicais")
             .then()
@@ -45,7 +54,7 @@ class GrupoMusicalResourceTest {
             List.of(1L, 2L)      // RM e Suga
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -62,7 +71,7 @@ class GrupoMusicalResourceTest {
 
     @Test
     void buscarPorNome_deveRetornarBTS() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/grupos-musicais/nome/BTS")
             .then()
@@ -72,7 +81,7 @@ class GrupoMusicalResourceTest {
 
     @Test
     void buscarPorEmpresa_deveConterBTSNaHYEntertainment() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/grupos-musicais/empresa/1")
             .then()
@@ -82,7 +91,7 @@ class GrupoMusicalResourceTest {
 
     @Test
     void buscarAtivos_deveConterBtsETwice() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/grupos-musicais/ativos")
             .then()
@@ -92,7 +101,7 @@ class GrupoMusicalResourceTest {
 
     @Test
     void buscarMembrosDeBTS_deveRetornarRMESuga() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/grupos-musicais/4/membros") // 4 = BTS no import-dev.sql
             .then()
@@ -121,7 +130,7 @@ class GrupoMusicalResourceTest {
             List.of(1L, 2L)
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -150,7 +159,7 @@ class GrupoMusicalResourceTest {
 
         GrupoMusicalResponseDTO criado = grupoService.create(dto);
 
-        RestAssured.given()
+        admin()
             .when()
                 .delete("/grupos-musicais/" + criado.id())
             .then()

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.ComposicaoDTO;
 import topicosAlbum.dto.ComposicaoResponseDTO;
@@ -32,8 +33,13 @@ public class FaixaResourceTest {
     @Inject
     ComposicaoService composicaoService;
 
-    // ---------- Helpers ----------
+    // ---------- Helper de autorização ----------
+    private RequestSpecification admin() {
+        String token = TokenUtils.getAdminToken(); // ajuste o nome se necessário
+        return RestAssured.given().header("Authorization", "Bearer " + token);
+    }
 
+    // ---------- Helpers ----------
     private ComposicaoResponseDTO criarComposicaoSimples(Long idProjetoMusical) {
         ComposicaoDTO dto = new ComposicaoDTO(
             LocalDate.now(),
@@ -46,7 +52,7 @@ public class FaixaResourceTest {
 
     @Test
     void buscarTodasFaixas_deveRetornar200() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/faixas")
             .then()
@@ -69,7 +75,7 @@ public class FaixaResourceTest {
             composicao.id()
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -116,7 +122,7 @@ public class FaixaResourceTest {
             compUpdate.id()   // muda a composição
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -153,14 +159,14 @@ public class FaixaResourceTest {
 
         FaixaResponseDTO criada = faixaService.create(dto);
 
-        RestAssured.given()
+        admin()
         .when()
             .delete("/faixas/" + criada.id())
         .then()
             .statusCode(204);
 
         // depois do delete, GET deve retornar 400
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/" + criada.id())
         .then()
@@ -171,7 +177,7 @@ public class FaixaResourceTest {
 
     @Test
     void buscarPorTitulo_deveEncontrarFaixaBlackSwanPorTrecho() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/titulo/Black")
         .then()
@@ -181,7 +187,7 @@ public class FaixaResourceTest {
 
     @Test
     void buscarPorAlbum_deveRetornarFaixasDoAlbum1() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/album/1")
         .then()
@@ -192,7 +198,7 @@ public class FaixaResourceTest {
     @Test
     void buscarPorArtistaParticipante_deveRetornarBlackSwanParaTaeyeon() {
         // Taeyeon = ProjetoMusical id = 3 (import-dev.sql)
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/participacao/3")
         .then()
@@ -203,7 +209,7 @@ public class FaixaResourceTest {
     @Test
     void buscarPorCompositor_deveRetornarFaixasDeRM() {
         // RM = ProjetoMusical id = 1
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/compositor/1")
         .then()
@@ -214,7 +220,7 @@ public class FaixaResourceTest {
     @Test
     void buscarPorGenero_deveRetornarFaixasKPop() {
         // Genero 1 = K-Pop, no import-dev.sql apenas "ON" está com idGenero=1
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/genero/1")
         .then()
@@ -224,7 +230,7 @@ public class FaixaResourceTest {
 
     @Test
     void buscarPorIdioma_deveRetornarFaixasEmCoreano() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/idioma/Korean")
         .then()
@@ -235,7 +241,7 @@ public class FaixaResourceTest {
     @Test
     void buscarPorTipoVersao_deveRetornarFaixasOriginais() {
         // 1 = ORIGINAL no enum TipoVersao
-        RestAssured.given()
+        admin()
         .when()
             .get("/faixas/find/tipoVersao/1")
         .then()

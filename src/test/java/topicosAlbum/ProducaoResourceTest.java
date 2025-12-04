@@ -1,6 +1,5 @@
 package topicosAlbum;
 
-
 import java.time.LocalDate;
 
 import org.hamcrest.CoreMatchers;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.EmpresaDTO;
 import topicosAlbum.dto.EmpresaResponseDTO;
@@ -29,13 +29,21 @@ class ProducaoResourceTest {
     @Inject
     EmpresaService empresaService;
 
+    // -------------------
+    // JWT helper
+    // -------------------
+    private RequestSpecification admin() {
+        return RestAssured.given()
+                .header("Authorization", "Bearer " + TokenUtils.getAdminToken());
+    }
+
     // -------------------------------------------------------------------------
     // CRUD BÁSICO
     // -------------------------------------------------------------------------
 
     @Test
     void buscarTodasProducoes_deveRetornar200() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/producoes")
             .then()
@@ -62,7 +70,7 @@ class ProducaoResourceTest {
             empresa.id()
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -110,7 +118,7 @@ class ProducaoResourceTest {
             empresa.id() // mesma empresa
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -152,7 +160,7 @@ class ProducaoResourceTest {
         ProducaoResponseDTO criada = producaoService.create(dto);
         Long id = criada.id();
 
-        RestAssured.given()
+        admin()
         .when()
             .delete("/producoes/" + id)
         .then()
@@ -170,7 +178,7 @@ class ProducaoResourceTest {
     @Test
     void buscarPorProdutor_deveRetornarListaComNomeCorreto() {
         // import-dev.sql: produz "Suga" para empresa 1
-        RestAssured.given()
+        admin()
         .when()
             .get("/producoes/find/produtor/Suga")
         .then()
@@ -181,7 +189,7 @@ class ProducaoResourceTest {
     @Test
     void buscarPorEngenheiroMixagem_deveRetornarProducoesRelacionadas() {
         // import-dev.sql: "El Capitxn" na produção 1
-        RestAssured.given()
+        admin()
         .when()
             .get("/producoes/find/mixagem/El Capitxn")
         .then()
@@ -192,7 +200,7 @@ class ProducaoResourceTest {
     @Test
     void buscarPorDataProducao_deveRetornarProducoesNaData() {
         // import-dev.sql: dataproducao = 2019-11-01 para produção do Suga
-        RestAssured.given()
+        admin()
         .when()
             .get("/producoes/find/data/2019-11-01")
         .then()
@@ -203,7 +211,7 @@ class ProducaoResourceTest {
     @Test
     void buscarPorPeriodoProducao_deveRetornarProducoesNoIntervalo() {
         // período que inclui 2019-11-01
-        RestAssured.given()
+        admin()
         .when()
             .get("/producoes/find/periodo?inicio=2019-01-01&fim=2019-12-31")
         .then()
@@ -214,7 +222,7 @@ class ProducaoResourceTest {
     @Test
     void buscarPorEmpresa_deveRetornarProducoesDaEmpresa() {
         // empresa 1 (HY) produz "MAP OF THE SOUL: 7" (Suga)
-        RestAssured.given()
+        admin()
         .when()
             .get("/producoes/find/empresa/1")
         .then()
@@ -225,7 +233,7 @@ class ProducaoResourceTest {
     @Test
     void buscarPorAlbum_deveRetornarProducaoCorreta() {
         // álbum 1 (MAP OF THE SOUL: 7) -> producao 1 (Suga)
-        RestAssured.given()
+        admin()
         .when()
             .get("/producoes/find/album/1")
         .then()

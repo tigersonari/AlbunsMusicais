@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.EmpresaDTO;
 import topicosAlbum.dto.EmpresaResponseDTO;
@@ -20,9 +21,18 @@ class EmpresaResourceTest {
     @Inject
     EmpresaService empresaService;
 
+    /**
+     * Helper para enviar requests com Authorization usando TokenUtils.
+     * Ajuste o nome do método em TokenUtils se for diferente (ex: generateAdminToken()).
+     */
+    private RequestSpecification admin() {
+        String token = TokenUtils.getAdminToken();
+        return RestAssured.given().header("Authorization", "Bearer " + token);
+    }
+
     @Test
     void buscarTodasEmpresas_deveRetornar200() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/empresas")
             .then()
@@ -39,7 +49,7 @@ class EmpresaResourceTest {
             "contato@empresa-teste.com"
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -75,7 +85,7 @@ class EmpresaResourceTest {
         );
 
         // 3) Chama o PUT pelo endpoint REST
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -106,7 +116,7 @@ class EmpresaResourceTest {
         Long id = criada.id();
 
         // 2) Deleta via endpoint REST
-        RestAssured.given()
+        admin()
         .when()
             .delete("/empresas/" + id)
         .then()
@@ -119,7 +129,7 @@ class EmpresaResourceTest {
     @Test
     void buscarPorNome_deveRetornarListaComFiltro() {
         // Usa dados do import-dev.sql (por exemplo, "HY Entertainment")
-        RestAssured.given()
+        admin()
         .when()
             .get("/empresas/find/nome/HY")
         .then()
@@ -130,7 +140,7 @@ class EmpresaResourceTest {
     @Test
     void buscarPorCnpj_deveRetornarEmpresaCorreta() {
         // Usa um CNPJ conhecido do import-dev.sql
-        RestAssured.given()
+        admin()
         .when()
             .get("/empresas/find/cnpj/12345678000199")
         .then()

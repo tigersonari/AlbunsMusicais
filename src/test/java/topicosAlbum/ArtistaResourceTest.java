@@ -1,6 +1,5 @@
 package topicosAlbum;
 
-
 import java.time.LocalDate;
 
 import org.hamcrest.CoreMatchers;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.ArtistaDTO;
 import topicosAlbum.dto.ArtistaResponseDTO;
@@ -25,13 +25,22 @@ class ArtistaResourceTest {
     @Inject
     ArtistaService artistaService;
 
+    /**
+     * Helper que aplica o header Authorization usando a sua classe TokenUtils
+     * (você disse que já criou). Usa token admin para testes que fazem escrita.
+     */
+    private RequestSpecification admin() {
+        String token = TokenUtils.getAdminToken();
+        return RestAssured.given().header("Authorization", "Bearer " + token);
+    }
+
     // -------------------------------------------------------
     // CRUD BÁSICO
     // -------------------------------------------------------
 
     @Test
     void buscarTodosArtistas_deveRetornar200() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/artistas")
             .then()
@@ -49,7 +58,7 @@ class ArtistaResourceTest {
             4L // Universal Music no import-dev.sql
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -91,7 +100,7 @@ class ArtistaResourceTest {
             2L
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -104,9 +113,9 @@ class ArtistaResourceTest {
         assertEquals(dtoUpdate.nomeCompleto(),    aposUpdate.nomeCompleto());
         assertEquals(dtoUpdate.nomeArtistico(),   aposUpdate.nomeArtistico());
         assertEquals(dtoUpdate.dataNascimento(),  aposUpdate.dataNascimento());
-        assertEquals(dtoUpdate.nacionalidade(),  aposUpdate.nacionalidade());
-        assertEquals(dtoUpdate.funcaoPrincipal(),aposUpdate.funcaoPrincipal());
-        assertEquals(dtoUpdate.idEmpresa(),      aposUpdate.empresa().id());
+        assertEquals(dtoUpdate.nacionalidade(),   aposUpdate.nacionalidade());
+        assertEquals(dtoUpdate.funcaoPrincipal(), aposUpdate.funcaoPrincipal());
+        assertEquals(dtoUpdate.idEmpresa(),       aposUpdate.empresa().id());
     }
 
     @Test
@@ -123,7 +132,7 @@ class ArtistaResourceTest {
         ArtistaResponseDTO criado = artistaService.create(dto);
         Long id = criado.id();
 
-        RestAssured.given()
+        admin()
         .when()
             .delete("/artistas/" + id)
         .then()
@@ -148,7 +157,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarPorNomeArtistico_deveRetornarRM() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/nome-artistico/RM")
         .then()
@@ -159,7 +168,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarPorNomeCompleto_deveRetornarSuga() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/nome/Min Yoongi")
         .then()
@@ -170,7 +179,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarPorNacionalidade_deveRetornarCoreanos() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/nacionalidade/Coreana")
         .then()
@@ -180,7 +189,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarPorFuncaoPrincipal_deveRetornarRappers() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/funcao/Rapper")
         .then()
@@ -191,7 +200,7 @@ class ArtistaResourceTest {
     @Test
     void buscarPorEmpresa_deveRetornarArtistasDaHY() {
         // Empresa 1 = HY Entertainment
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/empresa/1")
         .then()
@@ -222,7 +231,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarGruposDeRM_deveRetornarBTS() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/1/grupos")
         .then()
@@ -232,7 +241,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarAlbunsPrincipaisDeRM_deveRetornarMapOfTheSoul7() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/1/albuns")
         .then()
@@ -242,7 +251,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarAlbunsComParticipacaoDeTaeyeon_deveRetornarAlbum1() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/3/albuns/participacoes")
         .then()
@@ -254,19 +263,18 @@ class ArtistaResourceTest {
     void buscarFaixasParticipadasPorTaeyeon_deveRetornarBlackSwan() {
         var faixas = artistaService.findTodasFaixasRelacionadas(3L);
         // garante que veio pelo menos uma faixa
-          assertFalse(faixas.isEmpty(), "Nenhuma faixa encontrada para Taeyeon (id=3)");
+        assertFalse(faixas.isEmpty(), "Nenhuma faixa encontrada para Taeyeon (id=3)");
 
         // garante que Black Swan está na lista
-            assertTrue(
-                faixas.stream().anyMatch(f -> "Black Swan".equals(f.titulo())),
-                "Deveria conter a faixa 'Black Swan' entre as participações da Taeyeon"
-            );
-    }   
-
+        assertTrue(
+            faixas.stream().anyMatch(f -> "Black Swan".equals(f.titulo())),
+            "Deveria conter a faixa 'Black Swan' entre as participações da Taeyeon"
+        );
+    }
 
     @Test
     void buscarTodasFaixasRelacionadasARm_deveConterON() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/1/faixas/todas")
         .then()
@@ -276,7 +284,7 @@ class ArtistaResourceTest {
 
     @Test
     void buscarComposicoesDeRM_deveConterData2019_08_01() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/1/composicoes")
         .then()
@@ -301,7 +309,7 @@ class ArtistaResourceTest {
 
         ArtistaResponseDTO criado = artistaService.create(dto);
 
-        RestAssured.given()
+        admin()
         .when()
             .get("/artistas/" + criado.id())
         .then()

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.GeneroDTO;
 import topicosAlbum.dto.GeneroResponseDTO;
@@ -20,13 +21,21 @@ class GeneroResourceTest {
     @Inject
     GeneroService generoService;
 
+    // ==========================================================
+    // JWT Helper
+    // ==========================================================
+    private RequestSpecification admin() {
+        return RestAssured.given()
+                .header("Authorization", "Bearer " + TokenUtils.getAdminToken());
+    }
+
     // -------------------------------------------------------
     // CRUD BÁSICO
     // -------------------------------------------------------
 
     @Test
     void buscarTodosGeneros_deveRetornar200() {
-        RestAssured.given()
+        admin()
             .when()
                 .get("/generos")
             .then()
@@ -40,7 +49,7 @@ class GeneroResourceTest {
             "Gênero alternativo usado em testes automatizados"
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -56,13 +65,12 @@ class GeneroResourceTest {
 
     @Test
     void alterarGenero_deveAtualizarDadosCorretamente() {
-        // cria um gênero inicial via service (não mexe nos seeds)
+        // cria um gênero inicial via service
         GeneroDTO dto = new GeneroDTO(
             "Genero Original",
             "Descrição original"
         );
         GeneroResponseDTO criado = generoService.create(dto);
-
         Long id = criado.id();
 
         GeneroDTO dtoUpdate = new GeneroDTO(
@@ -70,7 +78,7 @@ class GeneroResourceTest {
             "Descrição atualizada"
         );
 
-        RestAssured.given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dtoUpdate)
         .when()
@@ -95,21 +103,23 @@ class GeneroResourceTest {
         GeneroResponseDTO criado = generoService.create(dto);
         Long id = criado.id();
 
-        RestAssured.given()
+        admin()
         .when()
             .delete("/generos/" + id)
         .then()
             .statusCode(204);
 
-        // após deletar, o service deve lançar ValidationException ao buscar
+        // após deletar, o service deve lançar ValidationException
         assertThrows(ValidationException.class, () -> generoService.findById(id));
     }
 
     // -------------------------------------------------------
+    // CONSULTAS
+    // -------------------------------------------------------
 
     @Test
     void buscarPorNome_deveRetornarGeneroKPop() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/generos/search/K-Pop")
         .then()
@@ -119,12 +129,11 @@ class GeneroResourceTest {
 
     @Test
     void buscarPorAlbum_deveRetornarGenerosDoAlbum1() {
-        RestAssured.given()
+        admin()
         .when()
             .get("/generos/album/1")
         .then()
             .statusCode(200)
-            // deve conter pelo menos K-Pop e Hip-Hop
             .body("nomeGenero", CoreMatchers.hasItems("K-Pop", "Hip-Hop"));
     }
 }

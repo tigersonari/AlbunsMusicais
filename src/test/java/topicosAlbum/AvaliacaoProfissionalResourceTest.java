@@ -8,8 +8,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import topicosAlbum.dto.AvaliacaoProfissionalDTO;
 import topicosAlbum.dto.AvaliacaoProfissionalResponseDTO;
@@ -21,11 +22,20 @@ public class AvaliacaoProfissionalResourceTest {
     @Inject
     AvaliacaoProfissionalService avaliacaoService;
 
+    /**
+     * Helper que aplica o header Authorization usando a sua classe TokenUtils.
+     * Usa token admin para testes que fazem escrita.
+     */
+    private RequestSpecification admin() {
+        String token = TokenUtils.getAdminToken();
+        return RestAssured.given().header("Authorization", "Bearer " + token);
+    }
+
     // ========== CRUD BÁSICO ==========
 
     @Test
     void buscarTodos_deveRetornarListaInicial() {
-        given()
+        admin()
         .when()
             .get("/avaliacoes")
         .then()
@@ -36,7 +46,7 @@ public class AvaliacaoProfissionalResourceTest {
     @Test
     void buscarPorId_deveRetornarBillboardMasterpiece() {
         // import-dev.sql: id 1 = Billboard, nota 10, album 1
-        given()
+        admin()
         .when()
             .get("/avaliacoes/{id}", 1L)
         .then()
@@ -56,7 +66,7 @@ public class AvaliacaoProfissionalResourceTest {
             1L // álbum 1 - MAP OF THE SOUL: 7
         );
 
-        given()
+        admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
@@ -82,14 +92,14 @@ public class AvaliacaoProfissionalResourceTest {
 
         AvaliacaoProfissionalResponseDTO criada = avaliacaoService.create(dto);
 
-        given()
+        admin()
         .when()
             .delete("/avaliacoes/{id}", criada.id())
         .then()
             .statusCode(204);
 
         // depois de deletar, buscar deve disparar ValidationException -> 400
-        given()
+        admin()
         .when()
             .get("/avaliacoes/{id}", criada.id())
         .then()
@@ -100,7 +110,7 @@ public class AvaliacaoProfissionalResourceTest {
 
     @Test
     void buscarPorAlbum_deveRetornarAvaliacoesDoAlbum1() {
-        given()
+        admin()
         .when()
             .get("/avaliacoes/album/{idAlbum}", 1L)
         .then()
@@ -111,7 +121,7 @@ public class AvaliacaoProfissionalResourceTest {
 
     @Test
     void buscarPorAvaliador_deveRetornarAvaliacoesDaBillboard() {
-        given()
+        admin()
         .when()
             .get("/avaliacoes/avaliador/{nome}", "Billboard")
         .then()
@@ -124,7 +134,7 @@ public class AvaliacaoProfissionalResourceTest {
     @Test
     void buscarPorAlbumENota_deveRetornarApenasNotaExata() {
         // Album 1 tem Billboard (10) e Rolling Stone (9.5)
-        given()
+        admin()
         .when()
             .get("/avaliacoes/album/{idAlbum}/nota/{nota}", 1L, 10.0)
         .then()
@@ -138,7 +148,7 @@ public class AvaliacaoProfissionalResourceTest {
     void buscarPorAlbumENotaMinima_deveRetornarApenasAvaliacoesAcimaDoCorte() {
         // Album 2: NME (8.8), Pitchfork (8.2)
         // Se notaMinima = 8.5, deve vir só NME
-        given()
+        admin()
         .when()
             .get("/avaliacoes/album/{idAlbum}/nota-minima/{nota}", 2L, 8.5)
         .then()
@@ -159,7 +169,7 @@ public class AvaliacaoProfissionalResourceTest {
             999L // álbum inexistente
         );
 
-        var response = given()
+        var response = admin()
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
