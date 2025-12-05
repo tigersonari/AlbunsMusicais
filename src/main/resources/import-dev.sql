@@ -160,6 +160,144 @@ VALUES
      now(), now());
 
 
+
+-- =========================
+-- PRODUTOS (1:1 com ÁLBUM)
+-- =========================
+INSERT INTO produto (id, album_id, preco, datacadastro, dataalteracao)
+VALUES
+    (1, 1, 120.00, now(), now()), -- Produto do álbum "MAP OF THE SOUL: 7"
+    (2, 2,  90.00, now(), now()); -- Produto do álbum "Taste of Love"
+
+-- =========================
+-- ESTOQUE
+-- =========================
+INSERT INTO estoque (produto_id, quantidade_disponivel)
+VALUES
+    (1, 50),  -- 50 unidades do produto 1
+    (2, 30);  -- 30 unidades do produto 2
+
+-- =========================
+-- ENDEREÇOS DE ENTREGA (USUÁRIO id=2 - 'user')
+-- =========================
+INSERT INTO endereco (id, rua, numero, complemento, bairro, cidade, uf, cep, usuario_id, datacadastro, dataalteracao)
+VALUES
+    (1, 'Rua das ARMYs',  '123', 'Ap 7',          'Centro',      'Seoul', 'SP', '01000-000', 2, now(), now()),
+    (2, 'Rua das ONCE',   '456', NULL,            'Bairro Pop',  'Seoul', 'SP', '02000-000', 2, now(), now());
+
+-- =========================
+-- PEDIDOS
+-- =========================
+-- Pedido 1: entrega no endereço 1, 1x produto 1 + 1x produto 2
+-- total = 120.00 + 90.00 = 210.00
+INSERT INTO pedido (
+    id,
+    data_criacao,
+    total,
+    usuario_id,
+    endereco_entrega_id,
+    observacao,
+    status,
+    datacadastro,
+    dataalteracao
+) VALUES (
+    1,
+    now(),
+    210.00,
+    2,
+    1,
+    'Primeiro pedido do usuário user',
+    'PAGAMENTO_PENDENTE',
+    now(),
+    now()
+);
+
+-- Pedido 2: retirada (sem endereço), 2x produto 2
+-- total = 2 * 90.00 = 180.00
+INSERT INTO pedido (
+    id,
+    data_criacao,
+    total,
+    usuario_id,
+    endereco_entrega_id,
+    observacao,
+    status,
+    datacadastro,
+    dataalteracao
+) VALUES (
+    2,
+    now(),
+    180.00,
+    2,
+    NULL,
+    'Pedido para retirada na loja',
+    'PAGO',
+    now(),
+    now()
+);
+
+-- =========================
+-- ITENS DE PEDIDO
+-- =========================
+INSERT INTO item_pedido (id, produto_id, quantidade, preco_unitario, pedido_id, datacadastro, dataalteracao)
+VALUES
+    -- Pedido 1: 1x produto 1 (120) + 1x produto 2 (90)
+    (1, 1, 1, 120.00, 1, now(), now()),
+    (2, 2, 1,  90.00, 1, now(), now()),
+    -- Pedido 2: 2x produto 2 (90)
+    (3, 2, 2,  90.00, 2, now(), now());
+
+-- =========================
+-- PAGAMENTOS
+-- =========================
+-- Pagamento 1: PIX pendente para o pedido 1 (sem código ainda, será gerado pelo service)
+INSERT INTO pagamento (
+    id,
+    pedido_id,
+    metodo_pagamento,
+    status,
+    valor,
+    codigo_pagamento,
+    data_criacao,
+    datacadastro,
+    dataalteracao
+) VALUES (
+    1,
+    1,
+    'PIX',
+    'PENDENTE',
+    210.00,
+    NULL,
+    now(),
+    now(),
+    now()
+);
+
+-- Pagamento 2: PIX já aprovado para o pedido 2
+INSERT INTO pagamento (
+    id,
+    pedido_id,
+    metodo_pagamento, 
+    status,
+    valor,
+    codigo_pagamento,
+    data_criacao,
+    datacadastro,
+    dataalteracao
+) VALUES (
+    2,
+    2,
+    'PIX',
+    'APROVADO',
+    180.00,
+    'SIMULADO-CODIGO-PIX-2',
+    now(),
+    now(),
+    now()
+);
+
+
+
 -- =========================
 -- AJUSTE DAS SEQUENCES (PostgreSQL)
 -- =========================
@@ -176,5 +314,12 @@ SELECT setval('composicao_id_seq',            (SELECT COALESCE(MAX(id), 0) FROM 
 SELECT setval('faixa_id_seq',                 (SELECT COALESCE(MAX(id), 0) FROM faixa));
 SELECT setval('participacao_id_seq',          (SELECT COALESCE(MAX(id), 0) FROM participacao));
 SELECT setval('avaliacaoprofissional_id_seq', (SELECT COALESCE(MAX(id), 0) FROM avaliacaoprofissional));
--- SELECT setval('usuario_id_seq', (SELECT COALESCE(MAX(id), 0) FROM usuario));
+-- Ajusta a sequence do ID de usuario para o maior id já inserido
+SELECT setval('usuario_id_seq', (SELECT COALESCE(MAX(id), 1) FROM usuario), true);
+
+SELECT setval('produto_id_seq',      (SELECT COALESCE(MAX(id), 0) FROM produto));
+SELECT setval('endereco_id_seq',     (SELECT COALESCE(MAX(id), 0) FROM endereco));
+SELECT setval('pedido_id_seq',       (SELECT COALESCE(MAX(id), 0) FROM pedido));
+SELECT setval('item_pedido_id_seq',  (SELECT COALESCE(MAX(id), 0) FROM item_pedido));
+SELECT setval('pagamento_id_seq',    (SELECT COALESCE(MAX(id), 0) FROM pagamento));
 

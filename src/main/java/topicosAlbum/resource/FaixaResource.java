@@ -1,5 +1,7 @@
 package topicosAlbum.resource;
 
+import org.jboss.logging.Logger;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -21,12 +23,15 @@ import topicosAlbum.service.FaixaService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class FaixaResource {
 
+    private static final Logger LOG = Logger.getLogger(FaixaResource.class);
+
     @Inject 
     FaixaService service;
 
     @GET
     @RolesAllowed({"ADM", "USER"})
     public Response findAll() {
+        LOG.info(">>> [FaixaResource] GET /faixas chamado para listar todas as faixas");
         return Response.ok(service.findAll()).build();
     }
 
@@ -34,6 +39,7 @@ public class FaixaResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response findById(@PathParam("id") Long id) {
+        LOG.info(">>> [FaixaResource] GET /faixas/{id} chamado para buscar faixa por id");
         return Response.ok(service.findById(id)).build();
     }
 
@@ -41,6 +47,7 @@ public class FaixaResource {
     @Path("/titulo/{titulo}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByTitulo(@PathParam("titulo") String titulo) {
+        LOG.info(">>> [FaixaResource] GET /faixas/titulo/{titulo} chamado para buscar faixa por título");
         return Response.ok(service.findByTitulo(titulo)).build();
     }
 
@@ -48,6 +55,7 @@ public class FaixaResource {
     @Path("/album/{idAlbum}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByAlbum(@PathParam("idAlbum") Long idAlbum) {
+        LOG.info(">>> [FaixaResource] GET /faixas/album/{idAlbum} chamado para buscar faixas por álbum");
         return Response.ok(service.findByAlbum(idAlbum)).build();
     }
 
@@ -55,6 +63,7 @@ public class FaixaResource {
     @Path("/participacao/{idProjeto}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByArtistaParticipante(@PathParam("idProjeto") Long idProjeto) {
+        LOG.info(">>> [FaixaResource] GET /faixas/participacao/{idProjeto} chamado para buscar faixas por artista participante");
         return Response.ok(service.findByArtistaParticipante(idProjeto)).build();
     }
 
@@ -62,6 +71,7 @@ public class FaixaResource {
     @Path("/compositor/{idProjeto}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByCompositor(@PathParam("idProjeto") Long idProjeto) {
+        LOG.info(">>> [FaixaResource] GET /faixas/compositor/{idProjeto} chamado para buscar faixas por compositor");
         return Response.ok(service.findByCompositor(idProjeto)).build();
     }
 
@@ -69,6 +79,7 @@ public class FaixaResource {
     @Path("/genero/{idGenero}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByGenero(@PathParam("idGenero") Long idGenero) {
+        LOG.info(">>> [FaixaResource] GET /faixas/genero/{idGenero} chamado para buscar faixas por gênero");
         return Response.ok(service.findByGenero(idGenero)).build();
     }
 
@@ -76,6 +87,7 @@ public class FaixaResource {
     @Path("/idioma/{idioma}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByIdioma(@PathParam("idioma") String idioma) {
+        LOG.info(">>> [FaixaResource] GET /faixas/idioma/{idioma} chamado para buscar faixas por idioma");
         return Response.ok(service.findByIdioma(idioma)).build();
     }
 
@@ -83,6 +95,7 @@ public class FaixaResource {
     @Path("/find/tipoVersao/{idTipoVersao}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByTipoVersao(@PathParam("idTipoVersao") Long idTipoVersao) {
+        LOG.info(">>> [FaixaResource] GET /faixas/find/tipoVersao/{idTipoVersao} chamado para buscar faixas por tipo de versão");
         return Response.ok(service.findByTipoVersao(idTipoVersao)).build();
     }
 
@@ -90,6 +103,7 @@ public class FaixaResource {
     @POST
     @RolesAllowed("ADM")
     public Response create(@Valid FaixaDTO dto) {
+        LOG.info(">>> [FaixaResource] POST /faixas criando nova faixa");
         return Response.status(Response.Status.CREATED)
             .entity(service.create(dto))
             .build();
@@ -99,6 +113,7 @@ public class FaixaResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, @Valid FaixaDTO dto) {
+        LOG.info(">>> [FaixaResource] PUT /faixas/{id} atualizando faixa com id: ");
         service.update(id, dto);
         return Response.noContent().build();
     }
@@ -107,6 +122,7 @@ public class FaixaResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
+        LOG.info(">>> [FaixaResource] DELETE /faixas/{id} apagando faixa com id: ");
         service.delete(id);
         return Response.noContent().build();
     }

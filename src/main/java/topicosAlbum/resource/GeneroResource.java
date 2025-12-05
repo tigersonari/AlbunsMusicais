@@ -1,5 +1,7 @@
 package topicosAlbum.resource;
 
+import org.jboss.logging.Logger;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -22,12 +24,15 @@ import topicosAlbum.service.GeneroService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class GeneroResource {
 
+    private static final Logger LOG = Logger.getLogger(GeneroResource.class);
+
     @Inject
     GeneroService service;
 
     @GET
     @RolesAllowed({"ADM", "USER"})
     public Response findAll() {
+        LOG.info(">>> [GeneroResource] GET /generos chamado para listar todos os gêneros");
         return Response.ok(service.findAll()).build();
     }
 
@@ -35,6 +40,7 @@ public class GeneroResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response findById(@PathParam("id") Long id) {
+        LOG.info(">>> [GeneroResource] GET /generos/{id} chamado para buscar gênero por id");   
         return Response.ok(service.findById(id)).build();
     }
 
@@ -42,6 +48,7 @@ public class GeneroResource {
     @Path("/search/{nomeGenero}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByNome(@PathParam("nomeGenero") String nomeGenero) {
+        LOG.info(">>> [GeneroResource] GET /generos/search/{nomeGenero} chamado para buscar gênero por nome");
         return Response.ok(service.findByNome(nomeGenero)).build();
     }
 
@@ -49,6 +56,7 @@ public class GeneroResource {
     @Path("/album/{idAlbum}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByAlbum(@PathParam("idAlbum") Long idAlbum) {
+        LOG.info(">>> [GeneroResource] GET /generos/album/{idAlbum} chamado para buscar gêneros por álbum");
         return Response.ok(service.findByAlbum(idAlbum)).build();
     } /*verificar */
 
@@ -56,6 +64,7 @@ public class GeneroResource {
     @POST
     @RolesAllowed("ADM")
     public Response create(@Valid GeneroDTO dto) {
+        LOG.info(">>> [GeneroResource] POST /generos criando novo gênero");
         return Response.status(Status.CREATED).entity(service.create(dto)).build();
     }
 
@@ -63,6 +72,7 @@ public class GeneroResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, @Valid GeneroDTO dto) {
+        LOG.info(">>> [GeneroResource] PUT /generos/{id} atualizando gênero com id: ");
         service.update(id, dto);
         return Response.noContent().build();
     }
@@ -71,6 +81,7 @@ public class GeneroResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
+        LOG.info(">>> [GeneroResource] DELETE /generos/{id} apagando gênero com id: ");
         service.delete(id);
         return Response.noContent().build();
     }

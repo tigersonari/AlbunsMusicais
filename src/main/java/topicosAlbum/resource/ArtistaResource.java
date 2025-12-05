@@ -1,5 +1,7 @@
 package topicosAlbum.resource;
 
+import org.jboss.logging.Logger;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -21,6 +23,8 @@ import topicosAlbum.service.ArtistaService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ArtistaResource {
 
+    private static final Logger LOG = Logger.getLogger(ArtistaResource.class);
+
     @Inject 
     ArtistaService service;
 
@@ -28,6 +32,7 @@ public class ArtistaResource {
     @GET
     @RolesAllowed({"ADM", "USER"})
     public Response findAll() {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar todos os artistas");
         return Response.ok(service.findAll()).build();
     }
 
@@ -35,12 +40,14 @@ public class ArtistaResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response findById(@PathParam("id") Long id) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar artista por id");
         return Response.ok(service.findById(id)).build();
     }
 
     @POST
     @RolesAllowed("ADM")
     public Response create(@Valid ArtistaDTO dto) {
+        LOG.info(">>> [ArtistaResource] POST /artistas criando novo artista");
         return Response.status(Response.Status.CREATED)
                 .entity(service.create(dto))
                 .build();
@@ -50,6 +57,7 @@ public class ArtistaResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, @Valid ArtistaDTO dto) {
+        LOG.info(">>> [ArtistaResource] PUT /artistas atualizando artista com id: ");
         service.update(id, dto);
         return Response.noContent().build();
     }
@@ -58,6 +66,7 @@ public class ArtistaResource {
     @Path("/{id}")
     @RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
+        LOG.info(">>> [ArtistaResource] DELETE /artistas deletando artista com id: ");
         service.delete(id);
         return Response.noContent().build();
     }
@@ -69,6 +78,7 @@ public class ArtistaResource {
     @Path("/nome-artistico/{nome}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByNomeArtistico(@PathParam("nome") String nome) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar artista por nome artistico");
         return Response.ok(service.findByNomeArtistico(nome)).build();
     }
 
@@ -76,6 +86,7 @@ public class ArtistaResource {
     @Path("/nome/{nome}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByNomeCompleto(@PathParam("nome") String nome) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar artista por nome completo");
         return Response.ok(service.findByNomeCompleto(nome)).build();
     }
 
@@ -83,6 +94,7 @@ public class ArtistaResource {
     @Path("/nacionalidade/{n}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByNacionalidade(@PathParam("n") String nacionalidade) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar artista por nacionalidade");
         return Response.ok(service.findByNacionalidade(nacionalidade)).build();
     }
 
@@ -90,6 +102,7 @@ public class ArtistaResource {
     @Path("/funcao/{f}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByFuncaoPrincipal(@PathParam("f") String funcao) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar artista por funcao principal");
         return Response.ok(service.findByFuncaoPrincipal(funcao)).build();
     }
 
@@ -97,6 +110,7 @@ public class ArtistaResource {
     @Path("/empresa/{idEmpresa}")
     @RolesAllowed({"ADM", "USER"})
     public Response findByEmpresa(@PathParam("idEmpresa") Long idEmpresa) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar artista por empresa");
         return Response.ok(service.findByEmpresaId(idEmpresa)).build();
     }
 
@@ -107,6 +121,7 @@ public class ArtistaResource {
     @Path("/{id}/grupos")
     @RolesAllowed({"ADM", "USER"})
     public Response findGruposByArtista(@PathParam("id") Long id) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar grupos do artista");
         return Response.ok(service.findGruposByArtistaId(id)).build();
     }
 
@@ -114,6 +129,7 @@ public class ArtistaResource {
     @Path("/{id}/albuns")
     @RolesAllowed({"ADM", "USER"})
     public Response findAlbunsPrincipais(@PathParam("id") Long id) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar albuns principais do artista");
         return Response.ok(service.findAlbunsPrincipaisByArtistaId(id)).build();
     }
 
@@ -121,6 +137,7 @@ public class ArtistaResource {
     @Path("/{id}/albuns/participacoes")
     @RolesAllowed({"ADM", "USER"})
     public Response findAlbunsComParticipacao(@PathParam("id") Long id) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar albuns com participacao do artista");
         return Response.ok(service.findAlbunsComParticipacaoByArtistaId(id)).build();
     }
 
@@ -129,6 +146,7 @@ public class ArtistaResource {
     @Path("/{id}/faixas/todas")
     @RolesAllowed({"ADM", "USER"})
     public Response findTodasFaixasRelacionadas(@PathParam("id") Long id) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar todas as faixas relacionadas ao artista");
         return Response.ok(service.findTodasFaixasRelacionadas(id)).build();
     }
 
@@ -136,6 +154,7 @@ public class ArtistaResource {
     @Path("/{id}/composicoes")
     @RolesAllowed({"ADM", "USER"})
     public Response findComposicoes(@PathParam("id") Long id) {
+        LOG.info(">>> [ArtistaResource] GET /artistas chamado para buscar composicoes do artista");
         return Response.ok(service.findComposicoesByArtistaId(id)).build();
     }
 }
