@@ -1,18 +1,12 @@
 package topicosAlbum.resource;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -24,63 +18,88 @@ import topicosAlbum.service.EnderecoService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class EnderecoResource {
 
-    
+    @Inject
+    JsonWebToken jwt;
+
     private static final Logger LOG = Logger.getLogger(EnderecoResource.class);
 
     @Inject
     EnderecoService service;
 
-    // ---------------- LISTAR POR USUÁRIO ----------------
+    private Long getUserId() {
+        return Long.valueOf(jwt.getClaim("idUsuario").toString());
+    }
+
+    private boolean isAdmin() {
+        return jwt.getGroups().contains("ADM");
+    }
+
+    // ----------- LISTAR ENDEREÇOS DO USUÁRIO -----------
 
     @GET
     @Path("/usuario/{idUsuario}")
     @RolesAllowed({"ADM", "USER"})
     public Response buscarPorUsuario(@PathParam("idUsuario") Long idUsuario) {
-        LOG.info(">>> [EnderecoResource] GET /enderecos chamado para buscar endereços por usuário");
+
+        Long idUsuarioToken = getUserId();
+
+        if (!isAdmin() && !idUsuario.equals(idUsuarioToken)) {
+            return Response.status(Status.FORBIDDEN).entity("Você não pode ver endereços de outros usuários.").build();
+        }
+
         return Response.ok(service.findByUsuario(idUsuario)).build();
     }
 
-    // ---------------- BUSCAR POR ID ----------------
+    // ----------- BUSCAR POR ID (ENFORCE OWNER) -----------
 
     @GET
     @Path("/{id}")
     @RolesAllowed({"ADM", "USER"})
     public Response buscarPorId(@PathParam("id") Long id) {
-        LOG.info(">>> [EnderecoResource] GET /enderecos chamado para buscar endereço por id");
-        return Response.ok(service.findById(id)).build();
+
+        Long idUsuarioToken = getUserId();
+
+        return Response.ok(service.findByIdSeguro(id, idUsuarioToken, isAdmin())).build();
     }
 
-    // ---------------- CRIAR ----------------
+    // ----------- CRIAR ENDEREÇO (sempre para o usuário logado) -----------
 
     @POST
     @RolesAllowed("USER")
     public Response incluir(@Valid EnderecoDTO dto) {
-        LOG.info(">>> [EnderecoResource] POST /enderecos criando novo endereço");
-        return Response
-            .status(Status.CREATED)
-            .entity(service.create(dto))
-            .build();
+
+        Long idUsuarioToken = getUserId();
+
+        return Response.status(Status.CREATED)
+                .entity(service.createParaUsuario(dto, idUsuarioToken))
+                .build();
     }
 
-    // ---------------- ATUALIZAR ----------------
+    // ----------- ATUALIZAR (somente dono) -----------
 
     @PUT
     @Path("/{id}")
     @RolesAllowed("USER")
     public Response alterar(@PathParam("id") Long id, @Valid EnderecoDTO dto) {
-        LOG.info(">>> [EnderecoResource] PUT /enderecos atualizando endereço com id: ");
-        service.update(id, dto);
+
+        Long idUsuarioToken = getUserId();
+
+        service.updateSeguro(id, dto, idUsuarioToken);
+
         return Response.noContent().build();
     }
 
-    // ---------------- REMOVER ----------------
+    // ----------- REMOVER (somente dono) -----------
 
     @DELETE
     @Path("/{id}")
     @RolesAllowed("USER")
     public Response apagar(@PathParam("id") Long id) {
-        LOG.info(">>> [EnderecoResource] DELETE /enderecos apagando endereço com id: ");
-        service.delete(id);
+
+        Long idUsuarioToken = getUserId();
+
+        service.deleteSeguro(id, idUsuarioToken);
+
         return Response.noContent().build();
     }
 }

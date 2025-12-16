@@ -3,7 +3,6 @@ package topicosAlbum;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +12,6 @@ import static io.restassured.http.ContentType.JSON;
 import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.HttpHeaders;
-import topicosAlbum.exception.ValidationException;
 import topicosAlbum.service.EnderecoService;
 
 @QuarkusTest
@@ -119,18 +117,23 @@ class EnderecoResourceTest {
                       "numero", is("999"));
     }
 
-    @Test
-    @DisplayName("DELETE /enderecos/{id} - deve remover com sucesso")
-    void apagarEndereco_deveRemoverComSucesso() {
-        Long idEndereco = criarEnderecoParaUser2();
+        @Test
+        @DisplayName("DELETE /enderecos/{id} - deve remover com sucesso")
+        void apagarEndereco_deveRemoverComSucesso() {
+            Long idEndereco = criarEnderecoParaUser2();
+        
+            user()
+                .when()
+                    .delete("/enderecos/" + idEndereco)
+                .then()
+                    .statusCode(204);
+        
+            admin()
+                .when()
+                    .get("/enderecos/" + idEndereco)
+                .then()
+                    .statusCode(400); // ← NÃO 404
+        }
 
-        user()
-            .when()
-                .delete("/enderecos/" + idEndereco)
-            .then()
-                .statusCode(204);
 
-        assertThrows(ValidationException.class,
-            () -> enderecoService.findById(idEndereco));
-    }
 }

@@ -7,11 +7,18 @@ import topicosAlbum.dto.PedidoResponseDTO;
 
 public interface PedidoService {
 
-    PedidoResponseDTO create(PedidoDTO dto);
+    //PedidoResponseDTO create(PedidoDTO dto);
 
     PedidoResponseDTO findById(Long idPedido);
 
     List<PedidoResponseDTO> findByUsuario(Long idUsuario);
 
     void cancelar(Long idPedido);
+
+    PedidoResponseDTO createParaUsuario(PedidoDTO dto, Long idUsuarioToken);
+
+PedidoResponseDTO findByIdSeguro(Long idPedido, Long idUsuarioToken, boolean isAdmin);
+
+void cancelarSeguro(Long idPedido, Long idUsuarioToken);
+
 }

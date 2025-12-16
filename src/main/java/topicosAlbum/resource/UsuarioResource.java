@@ -2,6 +2,7 @@ package topicosAlbum.resource;
 
 import java.util.List;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -27,6 +28,9 @@ import topicosAlbum.service.UsuarioService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class UsuarioResource {
 
+    @Inject
+JsonWebToken jwt;
+
     private static final Logger LOG = Logger.getLogger(UsuarioResource.class);
 
     @Inject
@@ -36,7 +40,6 @@ public class UsuarioResource {
 
     @POST
     @Path("/cadastro")
-    @RolesAllowed("USER")
     public Response cadastrar(@Valid UsuarioDTO dto) {
         LOG.info(">>> [UsuarioResource] POST /usuarios/cadastro chamado para cadastrar novo usuário");
         return Response
@@ -44,6 +47,8 @@ public class UsuarioResource {
             .entity(service.create(dto))
             .build();
     }
+    
+    
 
     // ---------------- LISTAR TODOS (ADM) ----------------
 

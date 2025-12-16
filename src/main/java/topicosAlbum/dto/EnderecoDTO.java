@@ -1,7 +1,7 @@
 package topicosAlbum.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public record EnderecoDTO(
 
@@ -12,11 +12,13 @@ public record EnderecoDTO(
     @NotBlank String cidade,
 
     @NotBlank
+    @Pattern(regexp = "^[A-Z]{2}$")
     String uf,
 
     @NotBlank
-    String cep,
+    @Pattern(regexp = "^\\d{5}-?\\d{3}$")
+    String cep
 
-    @NotNull
-    Long idUsuario
+    /*@NotNull
+    Long idUsuario*/
 ) {}

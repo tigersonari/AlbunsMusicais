@@ -12,6 +12,7 @@ import topicosAlbum.exception.ValidationException;
 import topicosAlbum.model.Perfil;
 import topicosAlbum.model.Usuario;
 import topicosAlbum.repository.UsuarioRepository;
+import topicosAlbum.security.PasswordUtils;
 
 
 
@@ -61,15 +62,20 @@ public UsuarioResponseDTO create(UsuarioDTO dto) {
 
     Usuario u = new Usuario();
     u.setLogin(dto.login());
-    u.setSenha(dto.senha());
+    u.setSenha(PasswordUtils.hash(dto.senha()));
 
     // Perfil padrão para cadastro público
     u.setPerfil(Perfil.USER);
+
+    u.setEmail(dto.email());
+    u.setTelefone(dto.telefone());
+    u.setNome(dto.nome());
 
     repository.persist(u);
 
     return UsuarioResponseDTO.valueOf(u);
 }
+
 
 
 }

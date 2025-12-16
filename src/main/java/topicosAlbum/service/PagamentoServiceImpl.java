@@ -23,101 +23,108 @@ public class PagamentoServiceImpl implements PagamentoService {
     @Inject
     PedidoRepository pedidoRepository;
 
-    // ---------------- BUSCAR PAGAMENTO ----------------
+    @Inject
+    PaymentGatewayFake gateway;
+
+    // ---------------- BUSCAR PAGAMENTO (SEGURO) ----------------
 
     @Override
-    public PagamentoResponseDTO findById(Long idPagamento) {
+    public PagamentoResponseDTO findByIdSeguro(Long idPagamento, Long idUsuarioToken, boolean isAdmin) {
 
         Pagamento p = pagamentoRepository.findById(idPagamento);
         if (p == null)
             throw ValidationException.of("id", "Pagamento não encontrado.");
 
+        if (!isAdmin && !p.getPedido().getUsuario().getId().equals(idUsuarioToken))
+            throw ValidationException.of("acesso", "Você não pode acessar o pagamento de outro usuário.");
+
         return toDTO(p);
     }
 
-    // ---------------- GERAR PIX PARA UM PEDIDO ----------------
+    // ---------------- GERAR PIX (SEGURO) ----------------
 
     @Override
     @Transactional
-    public PagamentoResponseDTO gerarPixParaPedido(Long idPedido) {
+    public PagamentoResponseDTO gerarPixParaPedidoSeguro(Long idPedido, Long idUsuarioToken, boolean isAdmin) {
 
         Pedido pedido = pedidoRepository.findById(idPedido);
         if (pedido == null)
             throw ValidationException.of("pedido", "Pedido não encontrado.");
 
-        Pagamento pagamento = pedido.getPagamento();
+        if (!isAdmin && !pedido.getUsuario().getId().equals(idUsuarioToken))
+            throw ValidationException.of("acesso", "Você não pode gerar PIX para pedido de outro usuário.");
 
-        if (pagamento == null)
-            throw ValidationException.of("pagamento", "Pedido não possui pagamento.");
+        Pagamento pagamento = pedido.getPagamento();
 
         if (!"PIX".equalsIgnoreCase(pagamento.getMetodoPagamento()))
             throw ValidationException.of("metodo", "Pagamento não é do tipo PIX.");
 
         if (pagamento.getCodigoPagamento() != null)
-            throw ValidationException.of("pix", "PIX já foi gerado para este pedido.");
+            throw ValidationException.of("pix", "PIX já foi gerado.");
 
-        // Geração de dados PIX (SIMULADO)
+        // gera copia e cola
         String txid = UUID.randomUUID().toString().replace("-", "");
         BigDecimal valor = pagamento.getValor();
 
         String copiaCola = gerarCodigoCopiaCola(txid, valor, pedido.getId());
-
-        String qrCodeBase64 = gerarQrCodeFakeBase64(copiaCola);
+        String qr = gerarQrCodeFakeBase64(copiaCola);
 
         pagamento.setCodigoPagamento(copiaCola);
         pagamento.setStatus("PENDENTE");
 
-        // Se você quiser evoluir depois, pode salvar também:
-        // - txid
-        // - payload completo
-
-        pagamentoRepository.persist(pagamento);
-
         return new PagamentoResponseDTO(
-            pagamento.getId(),
-            pagamento.getMetodoPagamento(),
-            pagamento.getStatus(),
-            pagamento.getValor(),
-            qrCodeBase64,
-            pagamento.getDataCriacao()
+                pagamento.getId(),
+                pagamento.getMetodoPagamento(),
+                pagamento.getStatus(),
+                pagamento.getValor(),
+                copiaCola,
+                pagamento.getDataCriacao(),
+                pagamento.getUltimos4(),
+                pagamento.getBandeira()
         );
     }
 
-    // ---------------- CONFIRMAR PAGAMENTO ----------------
+    // ---------------- SOLICITAR CONFIRMAÇÃO (não aprova aqui!) ----------------
 
     @Override
     @Transactional
-    public void confirmarPagamento(Long idPagamento) {
+    public void solicitarConfirmacao(Long idPagamento, Long idUsuarioToken) {
 
-        Pagamento pagamento = pagamentoRepository.findById(idPagamento);
-        if (pagamento == null)
+        Pagamento p = pagamentoRepository.findById(idPagamento);
+        if (p == null)
             throw ValidationException.of("id", "Pagamento não encontrado.");
 
-        if ("APROVADO".equalsIgnoreCase(pagamento.getStatus()))
+        Long dono = p.getPedido().getUsuario().getId();
+
+        if (!dono.equals(idUsuarioToken))
+            throw ValidationException.of("acesso", "Você não pode confirmar pagamento de outro usuário.");
+
+        if ("APROVADO".equalsIgnoreCase(p.getStatus()))
             throw ValidationException.of("status", "Pagamento já está aprovado.");
 
-        pagamento.setStatus("APROVADO");
+        if ("REJEITADO".equalsIgnoreCase(p.getStatus()))
+            throw ValidationException.of("status", "Pagamento já foi rejeitado.");
 
-        Pedido pedido = pagamento.getPedido();
-        pedido.setStatus("PAGO");
+        // NÃO CONFIRMA AQUI!!
+        // agendado automaticamente pelo scheduler
+        p.setStatus("PENDENTE");
     }
 
     // ---------------- AUXILIARES PRIVADOS ----------------
 
     private PagamentoResponseDTO toDTO(Pagamento p) {
         return new PagamentoResponseDTO(
-            p.getId(),
-            p.getMetodoPagamento(),
-            p.getStatus(),
-            p.getValor(),
-            p.getCodigoPagamento(),
-            p.getDataCriacao()
+                p.getId(),
+                p.getMetodoPagamento(),
+                p.getStatus(),
+                p.getValor(),
+                p.getCodigoPagamento(),
+                p.getDataCriacao(),
+                p.getUltimos4(),
+                p.getBandeira()
         );
     }
 
-    /**
-     * Gera um código PIX "copia e cola" SIMULADO.
-     */
     private String gerarCodigoCopiaCola(String txid, BigDecimal valor, Long idPedido) {
         return "00020126360014BR.GOV.BCB.PIX"
              + "01" + String.format("%02d", txid.length()) + txid
@@ -131,10 +138,6 @@ public class PagamentoServiceImpl implements PagamentoService {
              + "-PEDIDO-" + idPedido;
     }
 
-    /**
-     * Simula um QR Code em BASE64 a partir do código PIX.
-     * (Não é um QR real, mas serve perfeitamente para o trabalho e para testes)
-     */
     private String gerarQrCodeFakeBase64(String copiaCola) {
         return Base64.getEncoder().encodeToString(copiaCola.getBytes());
     }

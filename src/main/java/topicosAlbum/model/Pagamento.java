@@ -50,6 +50,19 @@ public class Pagamento extends DefaultEntity {
     @Column(name = "data_criacao")
     private LocalDateTime dataCriacao;
 
+    @Column(name = "ultimos4", length = 4)
+private String ultimos4;
+
+@Column(name = "bandeira")
+private String bandeira;
+
+public String getUltimos4() { return ultimos4; }
+public void setUltimos4(String ultimos4) { this.ultimos4 = ultimos4; }
+
+public String getBandeira() { return bandeira; }
+public void setBandeira(String bandeira) { this.bandeira = bandeira; }
+
+
     @PrePersist
     public void prePersist() {
         if (dataCriacao == null)

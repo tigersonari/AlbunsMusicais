@@ -7,10 +7,11 @@ import jakarta.validation.constraints.NotNull;
 
 public record PedidoDTO(
 
-    @NotNull
-    Long idUsuario,
+    /*@NotNull
+    Long idUsuario,*/
 
-    Long idEnderecoEntrega,
+   Long idEnderecoEntrega,
+   EnderecoDTO endereco,
 
     String observacao,
 

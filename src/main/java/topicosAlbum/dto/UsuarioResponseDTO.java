@@ -1,10 +1,9 @@
 package topicosAlbum.dto;
 
 
-import topicosAlbum.model.Perfil;
 import topicosAlbum.model.Usuario;
 
-public record UsuarioResponseDTO(Long id, String login, String senha, Perfil perfil) {
+public record UsuarioResponseDTO(Long id, String login, String senha, String nome, String email, String telefone /*Perfil perfil*/) {
 
     public static UsuarioResponseDTO valueOf(Usuario usuario) {
         if (usuario == null)
@@ -13,7 +12,11 @@ public record UsuarioResponseDTO(Long id, String login, String senha, Perfil per
             usuario.getId(), 
             usuario.getLogin(), 
             usuario.getSenha(),
-            usuario.getPerfil());
+            usuario.getNome(),
+            usuario.getEmail(),
+            usuario.getTelefone())
+            //usuario.getPerfil())
+            ;
     }
     
 }

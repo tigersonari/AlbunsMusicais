@@ -1,6 +1,6 @@
 package topicosAlbum.service;
 
-import topicosAlbum.model.Perfil;
+import topicosAlbum.model.Usuario;
 
 public interface JwtService {
 
@@ -10,5 +10,5 @@ public interface JwtService {
      * @param usuario usuário autenticado
      * @return token JWT assinado
      */
-    String generateJwt(String usuario, Perfil perfil);
+    String generateJwt(Usuario usuario);
 }

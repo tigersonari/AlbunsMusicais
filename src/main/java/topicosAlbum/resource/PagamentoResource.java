@@ -1,6 +1,6 @@
 package topicosAlbum.resource;
 
-import org.jboss.logging.Logger;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -13,50 +13,50 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import topicosAlbum.service.PagamentoService;
 
 @Path("/pagamentos")
-@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class PagamentoResource {
 
-    private static final Logger LOG = Logger.getLogger(PagamentoResource.class);
+    @Inject
+    JsonWebToken jwt;
 
     @Inject
     PagamentoService service;
-
-    // ---------------- BUSCAR PAGAMENTO ----------------
 
     @GET
     @Path("/{id}")
     @RolesAllowed({"ADM", "USER"})
     public Response buscarPorId(@PathParam("id") Long id) {
-        LOG.info(">>> [PagamentoResource] GET /pagamentos/{id} chamado para buscar pagamento por id");
-        return Response.ok(service.findById(id)).build();
-    }
 
-    // ---------------- GERAR PIX PARA UM PEDIDO ----------------
+        Long idToken = Long.valueOf(jwt.getClaim("idUsuario").toString());
+        boolean admin = jwt.getGroups().contains("ADM");
+
+        return Response.ok(service.findByIdSeguro(id, idToken, admin)).build();
+    }
 
     @POST
     @Path("/pix/{idPedido}")
     @RolesAllowed("USER")
     public Response gerarPix(@PathParam("idPedido") Long idPedido) {
-        LOG.info(">>> [PagamentoResource] POST /pagamentos/pix/{idPedido} chamado para gerar pix para pedido");
-        return Response
-            .status(Status.CREATED)
-            .entity(service.gerarPixParaPedido(idPedido))
-            .build();
-    }
 
-    // ---------------- CONFIRMAR PAGAMENTO ----------------
+        Long idToken = Long.valueOf(jwt.getClaim("idUsuario").toString());
+        boolean admin = jwt.getGroups().contains("ADM");
+
+        return Response.ok(service.gerarPixParaPedidoSeguro(idPedido, idToken, admin)).build();
+    }
 
     @PUT
     @Path("/{id}/confirmar")
     @RolesAllowed("USER")
-    public Response confirmar(@PathParam("id") Long idPagamento) {
-        LOG.info(">>> [PagamentoResource] PUT /pagamentos/{id}/confirmar chamado para confirmar pagamento");
-        service.confirmarPagamento(idPagamento);
-        return Response.noContent().build();
+    public Response solicitarConfirmacao(@PathParam("id") Long idPagamento) {
+
+        Long idToken = Long.valueOf(jwt.getClaim("idUsuario").toString());
+
+        service.solicitarConfirmacao(idPagamento, idToken);
+
+        return Response.accepted().entity("Pagamento enviado para processamento.").build();
     }
 }

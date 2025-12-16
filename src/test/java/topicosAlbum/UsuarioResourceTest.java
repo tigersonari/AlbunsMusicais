@@ -71,28 +71,37 @@ class UsuarioResourceTest {
     }
 
     @Test
-    @DisplayName("POST /usuarios/cadastro - deve cadastrar novo usuário (USER autenticado)")
+    @DisplayName("POST /usuarios/cadastro - deve cadastrar novo usuário")
     void cadastrar_deveRetornar201EBodyCorreto() {
-        String loginUnico = "user_test_" + System.currentTimeMillis();
-
+    
+        String loginUnico = "user_" + System.currentTimeMillis();
+    
         String json = """
         {
+          "nome": "Usuário Teste",
           "login": "%s",
           "senha": "123456",
-          "idPerfil": 2
+          "email": "teste@email.com",
+          "telefone": "11999999999"
         }
         """.formatted(loginUnico);
-
-        user()
+    
+        given()
             .contentType("application/json")
             .body(json)
         .when()
             .post("/usuarios/cadastro")
         .then()
             .statusCode(201)
-            .body("id", notNullValue(),
-                  "login", is(loginUnico));
+            .body(
+                "id", notNullValue(),
+                "login", is(loginUnico),
+                "email", is("teste@email.com"),
+                "telefone", is("11999999999")
+            );
     }
+
+
 
     @Test
     @DisplayName("GET /usuarios/{id} - deve retornar 404 quando usuário não existe")

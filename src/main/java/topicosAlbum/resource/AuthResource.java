@@ -49,7 +49,7 @@ public class AuthResource {
 
 
             // 4) gera token JWT com login + perfil
-            String token = jwtService.generateJwt(usuario.getLogin(), usuario.getPerfil());
+            String token = jwtService.generateJwt(usuario);
 
             // 5) monta DTO de resposta com o token
             AuthResponseDTO responseDTO = AuthResponseDTO.valueOf(usuario, token);

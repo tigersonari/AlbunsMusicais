@@ -12,9 +12,9 @@ public record PedidoResponseDTO(
     String status,
     String observacao,
 
-    Long idUsuario,
+    /*Long idUsuario,*/
 
-    Long idEnderecoEntrega,
+    EnderecoResponseDTO endereco,
 
     List<ItemPedidoResponseDTO> itens,
 

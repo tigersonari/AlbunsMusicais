@@ -8,14 +8,26 @@ import java.util.Set;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import topicosAlbum.model.Perfil;
+import topicosAlbum.model.Usuario;
 
 @ApplicationScoped
 public class JwtServiceImpl implements JwtService {
 
     private static final Duration EXPIRATION_TIME = Duration.ofHours(24);
 
+    /**
+     * Agora o JWT recebe o próprio Usuario,
+     * permitindo incluir o ID dentro do token.
+     */
     @Override
-    public String generateJwt(String login, Perfil perfil) {
+    public String generateJwt(Usuario usuario) {
+
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuário não pode ser nulo ao gerar JWT");
+        }
+
+        String login = usuario.getLogin();
+        Perfil perfil = usuario.getPerfil();
 
         if (login == null || login.isBlank()) {
             throw new IllegalArgumentException("Login não pode ser vazio ao gerar JWT");
@@ -30,12 +42,13 @@ public class JwtServiceImpl implements JwtService {
         Set<String> roles = new HashSet<>();
         roles.add(perfil.name()); // ADM, USER...
 
-        return Jwt.issuer("albuns-jwt")     // deve bater com application.properties
-                .subject(login)            // sub
-                .upn(login)                // user principal
-                .groups(roles)             // roles para @RolesAllowed
-                .expiresAt(expiryDate)     // expiração
+        return Jwt.issuer("albuns-jwt")
+                .subject(login)
+                .upn(login)
+                .groups(roles)
+                .expiresAt(expiryDate)
                 .claim("perfil", perfil.name())
-                .sign();                   // assina com privateKey.pem
+                .claim("idUsuario", usuario.getId())   // 🔥 ESSENCIAL
+                .sign();
     }
 }

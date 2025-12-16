@@ -78,7 +78,7 @@ class PagamentoResourceTest {
         .when()
             .post("/pagamentos/pix/" + idPedido)
         .then()
-            .statusCode(201)
+    .statusCode(200)
             .body("id", notNullValue(),
                   "metodoPagamento", is("PIX"),
                   "status", is("PENDENTE"),
@@ -96,7 +96,7 @@ class PagamentoResourceTest {
             .when()
                 .post("/pagamentos/pix/" + idPedido)
             .then()
-                .statusCode(201)
+                .statusCode(200)
                 .extract()
                 .path("id");
 
@@ -119,21 +119,22 @@ class PagamentoResourceTest {
 
         Number idNum =
             user()
-                .contentType(JSON)
-            .when()
-                .post("/pagamentos/pix/" + idPedido)
-            .then()
-                .statusCode(201)
-                .extract()
-                .path("id");
+                .when()
+                    .post("/pagamentos/pix/" + idPedido)
+                .then()
+                    .statusCode(200)
+                    .extract()
+                    .path("id");
 
         Long idPagamento = idNum.longValue();
 
         user()
-            .when()
-                .put("/pagamentos/" + idPagamento + "/confirmar")
-            .then()
-                .statusCode(204);
+        .contentType("application/json") // ← ESSENCIAL
+        .when()
+            .put("/pagamentos/" + idPagamento + "/confirmar")
+        .then()
+            .statusCode(200);
+
 
         user()
             .when()
@@ -149,4 +150,5 @@ class PagamentoResourceTest {
                 .statusCode(200)
                 .body("status", is("PAGO"));
     }
+
 }

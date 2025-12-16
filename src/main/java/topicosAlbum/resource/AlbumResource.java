@@ -25,6 +25,7 @@ import topicosAlbum.service.AlbumService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AlbumResource {
 
+
     private static final Logger LOG = Logger.getLogger(AlbumResource.class);
 
     @Inject

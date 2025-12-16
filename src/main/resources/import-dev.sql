@@ -9,21 +9,20 @@ VALUES
 (4, 'Universal Music', '11122233000199', 'Los Angeles', 'contact@umusic.com', now(), now());
 
 -- =========================
--- PROJETOS MUSICAIS (ARTISTAS e GRUPOS)
+-- PROJETOS MUSICAIS
 -- =========================
 INSERT INTO projetomusical (id, id_empresa, datacadastro, dataalteracao) VALUES
-(1, 1, now(), now()), -- RM
-(2, 1, now(), now()), -- Suga
-(3, 2, now(), now()), -- Taeyeon
-(4, 1, now(), now()), -- BTS
-(5, 3, now(), now()), -- Nayeon
-(6, 3, now(), now()), -- Chaeyoung
-(7, 4, now(), now()), -- Justin Bieber
-(8, 3, now(), now()); -- Twice
+(1, 1, now(), now()),
+(2, 1, now(), now()),
+(3, 2, now(), now()),
+(4, 1, now(), now()),
+(5, 3, now(), now()),
+(6, 3, now(), now()),
+(7, 4, now(), now()),
+(8, 3, now(), now());
 
 -- =========================
 -- ARTISTAS
--- (herdam de ProjetoMusical)
 -- =========================
 INSERT INTO artista (id, nomecompleto, datanascimento, nacionalidade, nomeartistico, funcaoprincipal)
 VALUES
@@ -42,11 +41,8 @@ VALUES
 (4, 'BTS', '2013-06-13', NULL),
 (8, 'Twice', '2015-10-20', NULL);
 
--- membros BTS
 INSERT INTO grupo_musical_artista (idgrupo, idartista) VALUES (4, 1);
 INSERT INTO grupo_musical_artista (idgrupo, idartista) VALUES (4, 2);
-
--- membros Twice
 INSERT INTO grupo_musical_artista (idgrupo, idartista) VALUES (8, 5);
 INSERT INTO grupo_musical_artista (idgrupo, idartista) VALUES (8, 6);
 
@@ -60,7 +56,7 @@ VALUES
 (3, 'Pop', 'Pop Internacional e Coreano', now(), now());
 
 -- =========================
--- PRODUCAO (1:1 com álbum)
+-- PRODUCAO
 -- =========================
 INSERT INTO producao (id, produtor, engenheirogravacao, engenheiromixagem, engenheiromasterizacao, dataproducao, idempresa, datacadastro, dataalteracao)
 VALUES 
@@ -69,34 +65,30 @@ VALUES
 
 -- =========================
 -- ALBUNS
--- (formato = enum, mantido como você definiu)
 -- =========================
 INSERT INTO album (id, titulo, lancamento, descricao, formato, idproducao, datacadastro, dataalteracao)
 VALUES
 (1, 'MAP OF THE SOUL: 7', '2020-02-21', 'Álbum icônico do BTS', 5, 1, now(), now()),
 (2, 'Taste of Love', '2021-06-11', 'Álbum de verão do Twice', 5, 2, now(), now());
 
--- relacionar principais ao album
 INSERT INTO album_projeto_musical (idalbum, idprojetomusical) VALUES 
-(1, 4), (1, 1), (1, 2), -- BTS, RM, Suga
-(2, 8), (2, 5), (2, 6); -- Twice, Nayeon, Chaeyoung
+(1, 4), (1, 1), (1, 2),
+(2, 8), (2, 5), (2, 6);
 
--- generos dos álbuns
 INSERT INTO album_genero (idalbum, idgenero) VALUES 
 (1, 1), (1, 2),
 (2, 1), (2, 3);
 
 -- =========================
--- COMPOSICOES (1 por faixa)
+-- COMPOSICOES
 -- =========================
 INSERT INTO composicao (id, data, datacadastro, dataalteracao)
 VALUES
-(1, '2019-08-01', now(), now()), -- ON
-(2, '2019-09-01', now(), now()), -- Black Swan
-(3, '2021-03-01', now(), now()), -- Alcohol-Free
-(4, '2021-04-01', now(), now()); -- Summer Love
+(1, '2019-08-01', now(), now()),
+(2, '2019-09-01', now(), now()),
+(3, '2021-03-01', now(), now()),
+(4, '2021-04-01', now(), now());
 
--- compositores
 INSERT INTO composicao_projeto (idcomposicao, idprojetomusical) VALUES
 (1, 1), (1, 2),
 (2, 1), (2, 2),
@@ -105,7 +97,6 @@ INSERT INTO composicao_projeto (idcomposicao, idprojetomusical) VALUES
 
 -- =========================
 -- FAIXAS
--- (tipoversao = enum, mantido como você definiu)
 -- =========================
 INSERT INTO faixa (id, titulo, numerofaixa, duracao, idioma, tipoversao, idgenero, idcomposicao, idalbum, datacadastro, dataalteracao)
 VALUES
@@ -122,11 +113,9 @@ VALUES
 (1, 'Feat', false, now(), now()),
 (2, 'Feat', false, now(), now());
 
--- Taeyeon no BTS (em Black Swan)
 INSERT INTO participacao_projeto (idparticipacao, idprojetomusical) VALUES (1, 3);
 UPDATE participacao SET idfaixa = 2 WHERE id = 1;
 
--- Justin Bieber com Twice
 INSERT INTO participacao_projeto (idparticipacao, idprojetomusical) VALUES (2, 7);
 UPDATE participacao SET idfaixa = 4 WHERE id = 2;
 
@@ -144,169 +133,106 @@ UPDATE avaliacaoprofissional SET idalbum = 1 WHERE id IN (1, 2);
 UPDATE avaliacaoprofissional SET idalbum = 2 WHERE id IN (3, 4);
 
 -- =========================
--- USUÁRIOS DO SISTEMA (AUTH)
+-- USUÁRIOS
 -- =========================
--- senha em texto plano: 123456
--- hash gerado com PBKDF2WithHmacSHA512, salt "#$127732&", iterationCount=403, keyLength=512
-INSERT INTO usuario (id, nome, login, senha, perfil, datacadastro, dataalteracao)
-VALUES
-    (1, 'Maximoff',  'admin',
-     '+RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==',
-     1,  -- Perfil.ADM 
-     now(), now()),
-    (2, 'Hirai',    'user',
-     '+RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==',
-     2,  -- Perfil.USER
-     now(), now());
+-- senha plaintext: 123456
+-- hash: +RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==
 
+INSERT INTO usuario (id, nome, login, senha, perfil, datacadastro, dataalteracao) VALUES
+(1, 'Maximoff', 'admin',
+ '+RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==',
+ 1, now(), now()),  -- ADM
 
+(2, 'Hirai', 'user',
+ '+RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==',
+ 2, now(), now()),  -- USER
+
+(3, 'Minatozaki', 'user2',
+ '+RMra81+PVL2HQWuh7xAkSohHzzzq62hw4zuaEpFHXbE0+pX+fzwOpTqmmuDA19zusgadv4fnMnHqLd2S32aXQ==',
+ 2, now(), now());  -- USER 2 (NOVO)
 
 -- =========================
--- PRODUTOS (1:1 com ÁLBUM)
+-- CARTÕES SALVOS (NOVO DOMÍNIO)
+-- Mantemos vazio — cartões serão criados via app
+-- =========================
+-- Nenhuma inserção aqui
+
+-- =========================
+-- PRODUTOS
 -- =========================
 INSERT INTO produto (id, album_id, preco, datacadastro, dataalteracao)
 VALUES
-    (1, 1, 120.00, now(), now()), -- Produto do álbum "MAP OF THE SOUL: 7"
-    (2, 2,  90.00, now(), now()); -- Produto do álbum "Taste of Love"
+(1, 1, 120.00, now(), now()),
+(2, 2,  90.00, now(), now());
 
 -- =========================
 -- ESTOQUE
 -- =========================
 INSERT INTO estoque (produto_id, quantidade_disponivel)
 VALUES
-    (1, 50),  -- 50 unidades do produto 1
-    (2, 30);  -- 30 unidades do produto 2
+(1, 50),
+(2, 30);
 
 -- =========================
--- ENDEREÇOS DE ENTREGA (USUÁRIO id=2 - 'user')
+-- ENDEREÇOS DO USUÁRIO 2
 -- =========================
 INSERT INTO endereco (id, rua, numero, complemento, bairro, cidade, uf, cep, usuario_id, datacadastro, dataalteracao)
 VALUES
-    (1, 'Rua das ARMYs',  '123', 'Ap 7',          'Centro',      'Seoul', 'SP', '01000-000', 2, now(), now()),
-    (2, 'Rua das ONCE',   '456', NULL,            'Bairro Pop',  'Seoul', 'SP', '02000-000', 2, now(), now());
+(1, 'Rua das ARMYs', '123', 'Ap 7', 'Centro', 'Seoul', 'SP', '01000-000', 2, now(), now()),
+(2, 'Rua das ONCE', '456', NULL, 'Bairro Pop', 'Seoul', 'SP', '02000-000', 2, now(), now());
 
 -- =========================
 -- PEDIDOS
 -- =========================
--- Pedido 1: entrega no endereço 1, 1x produto 1 + 1x produto 2
--- total = 120.00 + 90.00 = 210.00
 INSERT INTO pedido (
-    id,
-    data_criacao,
-    total,
-    usuario_id,
-    endereco_entrega_id,
-    observacao,
-    status,
-    datacadastro,
-    dataalteracao
+    id, data_criacao, total, usuario_id, endereco_entrega_id,
+    observacao, status, datacadastro, dataalteracao
 ) VALUES (
-    1,
-    now(),
-    210.00,
-    2,
-    1,
-    'Primeiro pedido do usuário user',
-    'PAGAMENTO_PENDENTE',
-    now(),
-    now()
+    1, now(), 210.00, 2, 1, 'Primeiro pedido do usuário user',
+    'PAGAMENTO_PENDENTE', now(), now()
 );
 
--- Pedido 2: retirada (sem endereço), 2x produto 2
--- total = 2 * 90.00 = 180.00
 INSERT INTO pedido (
-    id,
-    data_criacao,
-    total,
-    usuario_id,
-    endereco_entrega_id,
-    observacao,
-    status,
-    datacadastro,
-    dataalteracao
+    id, data_criacao, total, usuario_id, endereco_entrega_id,
+    observacao, status, datacadastro, dataalteracao
 ) VALUES (
-    2,
-    now(),
-    180.00,
-    2,
-    NULL,
-    'Pedido para retirada na loja',
-    'PAGO',
-    now(),
-    now()
+    2, now(), 180.00, 2, NULL, 'Pedido para retirada na loja',
+    'PAGO', now(), now()
 );
 
 -- =========================
--- ITENS DE PEDIDO
+-- ITENS DOS PEDIDOS
 -- =========================
 INSERT INTO item_pedido (id, produto_id, quantidade, preco_unitario, pedido_id, datacadastro, dataalteracao)
 VALUES
-    -- Pedido 1: 1x produto 1 (120) + 1x produto 2 (90)
-    (1, 1, 1, 120.00, 1, now(), now()),
-    (2, 2, 1,  90.00, 1, now(), now()),
-    -- Pedido 2: 2x produto 2 (90)
-    (3, 2, 2,  90.00, 2, now(), now());
+(1, 1, 1, 120.00, 1, now(), now()),
+(2, 2, 1,  90.00, 1, now(), now()),
+(3, 2, 2,  90.00, 2, now(), now());
 
 -- =========================
 -- PAGAMENTOS
 -- =========================
--- Pagamento 1: PIX pendente para o pedido 1 (sem código ainda, será gerado pelo service)
 INSERT INTO pagamento (
-    id,
-    pedido_id,
-    metodo_pagamento,
-    status,
-    valor,
-    codigo_pagamento,
-    data_criacao,
-    datacadastro,
-    dataalteracao
+    id, pedido_id, metodo_pagamento, status, valor,
+    codigo_pagamento, data_criacao, datacadastro, dataalteracao
 ) VALUES (
-    1,
-    1,
-    'PIX',
-    'PENDENTE',
-    210.00,
-    NULL,
-    now(),
-    now(),
-    now()
+    1, 1, 'PIX', 'PENDENTE', 210.00,
+    NULL, now(), now(), now()
 );
 
--- Pagamento 2: PIX já aprovado para o pedido 2
 INSERT INTO pagamento (
-    id,
-    pedido_id,
-    metodo_pagamento, 
-    status,
-    valor,
-    codigo_pagamento,
-    data_criacao,
-    datacadastro,
-    dataalteracao
+    id, pedido_id, metodo_pagamento, status, valor,
+    codigo_pagamento, data_criacao, datacadastro, dataalteracao
 ) VALUES (
-    2,
-    2,
-    'PIX',
-    'APROVADO',
-    180.00,
-    'SIMULADO-CODIGO-PIX-2',
-    now(),
-    now(),
-    now()
+    2, 2, 'PIX', 'APROVADO', 180.00,
+    'SIMULADO-CODIGO-PIX-2', now(), now(), now()
 );
 
-
-
 -- =========================
--- AJUSTE DAS SEQUENCES (PostgreSQL)
+-- SEQUENCES
 -- =========================
---  garante que os próximos INSERTs automáticos (via JPA) não reutilizem IDs já usados.
-
 SELECT setval('empresa_id_seq',               (SELECT COALESCE(MAX(id), 0) FROM empresa));
 SELECT setval('projetomusical_id_seq',        (SELECT COALESCE(MAX(id), 0) FROM projetomusical));
--- SELECT setval('artista_id_seq',               (SELECT COALESCE(MAX(id), 0) FROM artista));
--- SELECT setval('grupomusical_id_seq',          (SELECT COALESCE(MAX(id), 0) FROM grupomusical));
 SELECT setval('genero_id_seq',                (SELECT COALESCE(MAX(id), 0) FROM genero));
 SELECT setval('producao_id_seq',              (SELECT COALESCE(MAX(id), 0) FROM producao));
 SELECT setval('album_id_seq',                 (SELECT COALESCE(MAX(id), 0) FROM album));
@@ -314,12 +240,9 @@ SELECT setval('composicao_id_seq',            (SELECT COALESCE(MAX(id), 0) FROM 
 SELECT setval('faixa_id_seq',                 (SELECT COALESCE(MAX(id), 0) FROM faixa));
 SELECT setval('participacao_id_seq',          (SELECT COALESCE(MAX(id), 0) FROM participacao));
 SELECT setval('avaliacaoprofissional_id_seq', (SELECT COALESCE(MAX(id), 0) FROM avaliacaoprofissional));
--- Ajusta a sequence do ID de usuario para o maior id já inserido
-SELECT setval('usuario_id_seq', (SELECT COALESCE(MAX(id), 1) FROM usuario), true);
-
-SELECT setval('produto_id_seq',      (SELECT COALESCE(MAX(id), 0) FROM produto));
-SELECT setval('endereco_id_seq',     (SELECT COALESCE(MAX(id), 0) FROM endereco));
-SELECT setval('pedido_id_seq',       (SELECT COALESCE(MAX(id), 0) FROM pedido));
-SELECT setval('item_pedido_id_seq',  (SELECT COALESCE(MAX(id), 0) FROM item_pedido));
-SELECT setval('pagamento_id_seq',    (SELECT COALESCE(MAX(id), 0) FROM pagamento));
-
+SELECT setval('usuario_id_seq',               (SELECT COALESCE(MAX(id), 1) FROM usuario), true);
+SELECT setval('produto_id_seq',               (SELECT COALESCE(MAX(id), 0) FROM produto));
+SELECT setval('endereco_id_seq',              (SELECT COALESCE(MAX(id), 0) FROM endereco));
+SELECT setval('pedido_id_seq',                (SELECT COALESCE(MAX(id), 0) FROM pedido));
+SELECT setval('item_pedido_id_seq',           (SELECT COALESCE(MAX(id), 0) FROM item_pedido));
+SELECT setval('pagamento_id_seq',             (SELECT COALESCE(MAX(id), 0) FROM pagamento));

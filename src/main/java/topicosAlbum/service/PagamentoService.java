@@ -4,9 +4,10 @@ import topicosAlbum.dto.PagamentoResponseDTO;
 
 public interface PagamentoService {
 
-    PagamentoResponseDTO findById(Long idPagamento);
+    PagamentoResponseDTO findByIdSeguro(Long idPagamento, Long idUsuarioToken, boolean isAdmin);
 
-    PagamentoResponseDTO gerarPixParaPedido(Long idPedido);
+    PagamentoResponseDTO gerarPixParaPedidoSeguro(Long idPedido, Long idUsuarioToken, boolean isAdmin);
 
-    void confirmarPagamento(Long idPagamento);
+    void solicitarConfirmacao(Long idPagamento, Long idUsuarioToken);
+
 }

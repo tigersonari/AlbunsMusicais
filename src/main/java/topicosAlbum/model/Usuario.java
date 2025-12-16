@@ -12,6 +12,8 @@ public class Usuario extends DefaultEntity {
     @Column(unique = true)
     private String login;
     private String senha;
+    private String email;
+    private String telefone;
     
     private Perfil perfil;
 
@@ -45,6 +47,22 @@ public class Usuario extends DefaultEntity {
 
     public void setPerfil(Perfil perfil) {
         this.perfil = perfil;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 
    
