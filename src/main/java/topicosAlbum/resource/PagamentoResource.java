@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -48,7 +47,7 @@ public class PagamentoResource {
         return Response.ok(service.gerarPixParaPedidoSeguro(idPedido, idToken, admin)).build();
     }
 
-    @PUT
+    /*@PUT
     @Path("/{id}/confirmar")
     @RolesAllowed("USER")
     public Response solicitarConfirmacao(@PathParam("id") Long idPagamento) {
@@ -58,5 +57,5 @@ public class PagamentoResource {
         service.solicitarConfirmacao(idPagamento, idToken);
 
         return Response.accepted().entity("Pagamento enviado para processamento.").build();
-    }
+    }*/
 }
