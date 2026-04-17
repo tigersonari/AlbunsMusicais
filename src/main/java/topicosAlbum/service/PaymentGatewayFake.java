@@ -15,7 +15,7 @@ public class PaymentGatewayFake {
         switch (metodo.toUpperCase()) {
 
             case "PIX":
-                return true; // PIX sempre aprova automaticamente no seu sistema
+                return true; // PIX sempre aprova automaticamente no sistema
 
             case "BOLETO":
                 // boleto só aprova depois do scheduler rodar uma vez

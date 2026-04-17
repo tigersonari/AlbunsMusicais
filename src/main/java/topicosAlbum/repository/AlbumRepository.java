@@ -10,37 +10,76 @@ import topicosAlbum.model.Formato;
 @ApplicationScoped
 public class AlbumRepository implements PanacheRepository<Album> {
 
-    public List<Album> findByTitulo(String titulo) {
+    /*public List<Album> findByTitulo(String titulo) {
         return find("LOWER(titulo) LIKE ?1", "%" + titulo.toLowerCase() + "%").list();
-    }
+    }*/
 
-    public List<Album> findByFormato(Formato formato) {
+    public List<Album> findByTitulo(String titulo, int page, int pageSize) {
+    return find("LOWER(titulo) LIKE ?1", "%" + titulo.toLowerCase() + "%")
+            .page(page, pageSize)
+            .list();
+    } //com paginação
+
+    /*public List<Album> findByFormato(Formato formato) {
         return find("formato = ?1", formato).list();
-    }
+    }*/
 
-    public List<Album> findByAnoLancamento(int ano) {
+        public List<Album> findByFormato(Formato formato, int page, int pageSize) {
+        return find("formato = ?1", formato)
+                .page(page, pageSize)
+                .list();
+    } //com paginação
+
+    /*public List<Album> findByAnoLancamento(int ano) {
        
         return find("EXTRACT(YEAR FROM lancamento) = ?1", ano).list();
-    }
+    }*/
 
-    public List<Album> findByProjetoMusicalId(Long idProjetoMusical) {
+        public List<Album> findByAnoLancamento(int ano, int page, int pageSize) {
+        return find("EXTRACT(YEAR FROM lancamento) = ?1", ano)
+                .page(page, pageSize)
+                .list();
+    } //com paginação
+
+    /*public List<Album> findByProjetoMusicalId(Long idProjetoMusical) {
         return find("""
             SELECT DISTINCT a FROM Album a
             JOIN a.projetoMusical p
             WHERE p.id = ?1
         """, idProjetoMusical).list();
-    }
+    }*/
 
-    public List<Album> findColaboracoesEntre(Long idProjetoMusical1, Long idProjetoMusical2) {
+        public List<Album> findByProjetoMusicalId(Long idProjetoMusical, int page, int pageSize) {
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.projetoMusical p
+            WHERE p.id = ?1
+        """, idProjetoMusical)
+        .page(page, pageSize)
+        .list();
+    } //com paginação
+
+    /*public List<Album> findColaboracoesEntre(Long idProjetoMusical1, Long idProjetoMusical2) {
         return find("""
             SELECT DISTINCT a FROM Album a
             JOIN a.projetoMusical p1
             JOIN a.projetoMusical p2
             WHERE p1.id = ?1 AND p2.id = ?2
         """, idProjetoMusical1, idProjetoMusical2).list();
-    }
+    }*/
 
-    public List<Album> findByEmpresaProducao(Long idEmpresa) {
+        public List<Album> findColaboracoesEntre(Long id1, Long id2, int page, int pageSize) {
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.projetoMusical p1
+            JOIN a.projetoMusical p2
+            WHERE p1.id = ?1 AND p2.id = ?2
+        """, id1, id2)
+        .page(page, pageSize)
+        .list();
+    } //com paginação
+
+    /*public List<Album> findByEmpresaProducao(Long idEmpresa) {
         return find("""
             SELECT DISTINCT a FROM Album a
             JOIN a.producao pr
@@ -101,6 +140,83 @@ public class AlbumRepository implements PanacheRepository<Album> {
                 WHERE LOWER(f.titulo) LIKE :titulo
             """, Album.class)
             .setParameter("titulo", "%" + tituloFaixa.toLowerCase() + "%")
+            .getResultList();
+    }*/
+
+            public List<Album> findByEmpresaProducao(Long idEmpresa, int page, int pageSize) {
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.producao pr
+            WHERE pr.empresa.id = ?1
+        """, idEmpresa)
+        .page(page, pageSize)
+        .list();
+    }
+
+    public List<Album> findByProdutor(String produtor, int page, int pageSize) {
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.producao p
+            WHERE LOWER(p.produtor) LIKE ?1
+        """, "%" + produtor.toLowerCase() + "%")
+        .page(page, pageSize)
+        .list();
+    }
+
+    public List<Album> findByEngenheiroMixagem(String nome, int page, int pageSize) {
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.producao p
+            WHERE LOWER(p.engenheiroMixagem) LIKE ?1
+        """, "%" + nome.toLowerCase() + "%")
+        .page(page, pageSize)
+        .list();
+    }
+
+    public List<Album> findByEngenheiroMasterizacao(String nome, int page, int pageSize) {
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.producao p
+            WHERE LOWER(p.engenheiroMasterizacao) LIKE ?1
+        """, "%" + nome.toLowerCase() + "%")
+        .page(page, pageSize)
+        .list();
+    }
+
+    public List<Album> findByGeneroId(Long idGenero, int page, int pageSize) {
+        return find("""
+            SELECT DISTINCT a FROM Album a
+            JOIN a.generos g
+            WHERE g.id = ?1
+        """, idGenero)
+        .page(page, pageSize)
+        .list();
+    }
+
+    //  manual pagination (EntityManager)
+    public List<Album> findByParticipacao(Long idProjeto, int page, int pageSize) {
+        return getEntityManager()
+            .createQuery("""
+                SELECT DISTINCT f.album FROM Faixa f
+                JOIN f.participacoes part
+                JOIN part.projetoMusical pm
+                WHERE pm.id = :idProjeto
+            """, Album.class)
+            .setParameter("idProjeto", idProjeto)
+            .setFirstResult(page * pageSize)
+            .setMaxResults(pageSize)
+            .getResultList();
+    }
+
+    public List<Album> findByFaixaTitulo(String titulo, int page, int pageSize) {
+        return getEntityManager()
+            .createQuery("""
+                SELECT DISTINCT f.album FROM Faixa f
+                WHERE LOWER(f.titulo) LIKE :titulo
+            """, Album.class)
+            .setParameter("titulo", "%" + titulo.toLowerCase() + "%")
+            .setFirstResult(page * pageSize)
+            .setMaxResults(pageSize)
             .getResultList();
     }
 }

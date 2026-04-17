@@ -1,0 +1,41 @@
+@startuml
+left to right direction
+
+actor Administrador
+actor Cliente
+
+rectangle "Sistema E-commerce de Música" {
+
+  usecase "Gerenciar Álbuns" as UC1
+  usecase "Gerenciar Faixas" as UC2
+  usecase "Gerenciar Artistas" as UC3
+  usecase "Gerenciar Grupos Musicais" as UC4
+  usecase "Gerenciar Empresas" as UC5
+  usecase "Gerenciar Produção Musical" as UC6
+  usecase "Registrar Participação Musical" as UC7
+  usecase "Registrar Composição" as UC8
+  usecase "Registrar Avaliação de Álbum" as UC9
+
+  usecase "Consultar Catálogo Musical" as UC10
+  usecase "Visualizar Detalhes de Álbum" as UC11
+  usecase "Comprar Álbum" as UC12
+}
+
+Administrador --> UC1
+Administrador --> UC2
+Administrador --> UC3
+Administrador --> UC4
+Administrador --> UC5
+Administrador --> UC6
+Administrador --> UC7
+Administrador --> UC8
+Administrador --> UC9
+
+Cliente --> UC10
+Cliente --> UC11
+Cliente --> UC12
+
+UC11 .> UC10 : <<include>>
+UC12 .> UC11 : <<include>>
+
+@enduml

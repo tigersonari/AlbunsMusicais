@@ -8,7 +8,7 @@ import topicosAlbum.dto.AlbumResponseDTO;
 
 public interface AlbumService {
     
-    List<AlbumResponseDTO> findAll();
+    /*List<AlbumResponseDTO> findAll();
     AlbumResponseDTO findById(Long id);
     List<AlbumResponseDTO> findByTitulo(String titulo);
     
@@ -28,4 +28,28 @@ public interface AlbumService {
     List<AlbumResponseDTO> findByGenero(Long idGenero);
     List<AlbumResponseDTO> findByParticipacao(Long idProjetoMusical);
     List<AlbumResponseDTO> findByFaixaTitulo(String tituloFaixa);
+    long count(); //COUNT
+    List<AlbumResponseDTO> findAll(int page, int pageSize); // PAGINAÇÃO*/
+
+    List<AlbumResponseDTO> findAll(int page, int pageSize);
+    AlbumResponseDTO findById(Long id);
+    List<AlbumResponseDTO> findByTitulo(String titulo, int page, int pageSize);
+
+    AlbumResponseDTO create(@Valid AlbumDTO dto);
+    void update(Long id, @Valid AlbumDTO dto);
+    void delete(Long id);
+
+    List<AlbumResponseDTO> findByAnoLancamento(int ano, int page, int pageSize);
+    List<AlbumResponseDTO> findByFormato(Long idFormato, int page, int pageSize);
+    List<AlbumResponseDTO> findByArtistaPrincipal(Long idProjetoMusical, int page, int pageSize);
+    List<AlbumResponseDTO> findColaboracoesEntre(Long id1, Long id2, int page, int pageSize);
+    List<AlbumResponseDTO> findByEmpresaProducao(Long idEmpresa, int page, int pageSize);
+    List<AlbumResponseDTO> findByProdutor(String produtor, int page, int pageSize);
+    List<AlbumResponseDTO> findByEngenheiroMixagem(String nome, int page, int pageSize);
+    List<AlbumResponseDTO> findByEngenheiroMasterizacao(String nome, int page, int pageSize);
+    List<AlbumResponseDTO> findByGenero(Long idGenero, int page, int pageSize);
+    List<AlbumResponseDTO> findByParticipacao(Long idProjeto, int page, int pageSize);
+    List<AlbumResponseDTO> findByFaixaTitulo(String titulo, int page, int pageSize);
+
+    long count();
 }

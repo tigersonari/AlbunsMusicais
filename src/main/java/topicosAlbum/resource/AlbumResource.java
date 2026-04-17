@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -30,16 +31,142 @@ public class AlbumResource {
 
     @Inject
     AlbumService service;
+
+    // ========================
+    // COUNT
+    // ========================
+    @GET
+    @Path("/count")
+    @RolesAllowed({"ADM", "USER"})
+    public Response count() {
+        LOG.info(">>> [AlbumResource] GET /albums/count");
+        return Response.ok(service.count()).build();
+    }
+
+    // ========================
+    // LISTAGEM PAGINADA
+    // ========================
+    @GET
+    @RolesAllowed({"ADM", "USER"})
+    public Response buscarTodos(
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("pageSize") @DefaultValue("10") int pageSize
+    ) {
+        LOG.info(">>> [AlbumResource] GET /albums paginado");
+        return Response.ok(service.findAll(page, pageSize)).build();
+    }
+
+    // ========================
+    // CRUD
+    // ========================
+    @GET
+    @Path("/{id}")
+    @RolesAllowed("ADM")
+    public Response buscarPorId(@PathParam("id") Long id) {
+        LOG.info(">>> GET album por id");
+        return Response.ok(service.findById(id)).build();
+    }
+
+    @POST
+    @RolesAllowed("ADM")
+    public Response incluir(@Valid AlbumDTO dto) {
+        LOG.info(">>> POST album");
+        return Response.status(Status.CREATED).entity(service.create(dto)).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @RolesAllowed("ADM")
+    public Response alterar(@PathParam("id") Long id, @Valid AlbumDTO dto) {
+        LOG.info(">>> PUT album");
+        service.update(id, dto);
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @RolesAllowed("ADM")
+    public Response apagar(@PathParam("id") Long id) {
+        LOG.info(">>> DELETE album");
+        service.delete(id);
+        return Response.noContent().build();
+    }
+
+    // ========================
+    // BUSCAS COM PAGINAÇÃO
+    // ========================
+    @GET
+    @Path("/find/titulo/{titulo}")
+    public Response buscarPorTitulo(@PathParam("titulo") String titulo,
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+
+        LOG.info(">>> buscar por titulo");
+        return Response.ok(service.findByTitulo(titulo, page, pageSize)).build();
+    }
+
+    @GET
+    @Path("/find/ano/{ano}")
+    public Response buscarPorAno(@PathParam("ano") int ano,
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+
+        LOG.info(">>> buscar por ano");
+        return Response.ok(service.findByAnoLancamento(ano, page, pageSize)).build();
+    }
+
+    @GET
+    @Path("/find/formato/{id}")
+    public Response buscarPorFormato(@PathParam("id") Long id,
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+
+        LOG.info(">>> buscar por formato");
+        return Response.ok(service.findByFormato(id, page, pageSize)).build();
+    }
+
+    @GET
+    @Path("/find/genero/{id}")
+    public Response buscarPorGenero(@PathParam("id") Long id,
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+
+        LOG.info(">>> buscar por genero");
+        return Response.ok(service.findByGenero(id, page, pageSize)).build();
+    }
     
 
+    /*
     //crud
+
+    //COUNT
+    @GET
+@Path("/count")
+@RolesAllowed({"ADM", "USER"})
+public Response count() {
+    LOG.info(">>> [AlbumResource] GET /albums/count contando registros");
+    return Response.ok(service.count()).build();
+}
+//COUNT
 
     @GET
     @RolesAllowed({"ADM", "USER"})
     public Response buscarTodos() {
         LOG.info(">>> [AlbumResource] GET /albums chamado para buscar todos os álbuns");
         return Response.ok(service.findAll()).build();
-    }
+    } //ROLESALLOWED ANTIGO
+
+    // Implementação de paginação
+    @GET
+@RolesAllowed({"ADM", "USER"})
+public Response buscarTodos(
+    @QueryParam("page") @DefaultValue("0") int page,
+    @QueryParam("pageSize") @DefaultValue("10") int pageSize
+) {
+    LOG.info(">>> [AlbumResource] GET /albums paginado");
+    return Response.ok(service.findAll(page, pageSize)).build();
+}
+// Implementação de paginação
 
     @GET
     @Path("/{id}")
@@ -85,6 +212,8 @@ public class AlbumResource {
         LOG.info(">>> [AlbumResource] GET /albums buscando álbum por título");
         return Response.ok(service.findByTitulo(titulo)).build();
     }
+
+    
 
     @GET
     @Path("/find/ano/{ano}")
@@ -176,5 +305,5 @@ public Response buscarPorParticipacao(@PathParam("idProjetoMusical") Long idProj
     public Response buscarPorTituloFaixa(@PathParam("tituloFaixa") String tituloFaixa) {
         LOG.info(">>> [AlbumResource] GET /albums buscando álbum por título de faixa");
         return Response.ok(service.findByFaixaTitulo(tituloFaixa)).build();
-    }
+    }*/
 }

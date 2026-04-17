@@ -1,0 +1,36 @@
+@startuml
+left to right direction
+
+actor Administrador
+actor Participante
+
+rectangle "Sistema de Gerenciamento de Eventos" {
+
+  (Cadastrar Evento)
+  (Editar Evento)
+  (Excluir Evento)
+  (Gerenciar Usuários)
+  (Registrar Presença)
+  (Gerar Relatórios)
+
+  (Realizar Cadastro)
+  (Login)
+  (Consultar Eventos)
+  (Visualizar Detalhes)
+  (Realizar Inscrição)
+
+  Administrador -- (Cadastrar Evento)
+  Administrador -- (Editar Evento)
+  Administrador -- (Excluir Evento)
+  Administrador -- (Gerenciar Usuários)
+  Administrador -- (Registrar Presença)
+  Administrador -- (Gerar Relatórios)
+
+  Participante -- (Realizar Cadastro)
+  Participante -- (Login)
+  Participante -- (Consultar Eventos)
+  Participante -- (Visualizar Detalhes)
+  Participante -- (Realizar Inscrição)
+
+}
+@enduml

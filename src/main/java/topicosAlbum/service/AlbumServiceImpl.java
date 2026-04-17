@@ -28,8 +28,190 @@ public class AlbumServiceImpl implements AlbumService {
     @Inject ArtistaRepository artistaRepository;
     @Inject GrupoMusicalRepository grupoRepository;
     @Inject GeneroRepository generoRepository;
+    
+
+    // ========================
+    // PAGINAÇÃO + LISTAGEM
+    // ========================
+    @Override
+    public List<AlbumResponseDTO> findAll(int page, int pageSize) {
+        return albumRepository.findAll()
+                .page(page, pageSize)
+                .list()
+                .stream()
+                .map(AlbumResponseDTO::valueOf)
+                .toList();
+    }
 
     @Override
+    public long count() {
+        return albumRepository.count();
+    }
+
+    @Override
+    public AlbumResponseDTO findById(Long id) {
+        Album album = albumRepository.findById(id);
+        if (album == null)
+            throw ValidationException.of("id", "Álbum não encontrado.");
+        return AlbumResponseDTO.valueOf(album);
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByTitulo(String titulo, int page, int pageSize) {
+        return albumRepository.findByTitulo(titulo, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    // ========================
+    // CRUD
+    // ========================
+    @Override
+    @Transactional
+    public AlbumResponseDTO create(@Valid AlbumDTO dto) {
+        Album album = new Album();
+        updateEntityFromDTO(album, dto);
+        albumRepository.persist(album);
+        return AlbumResponseDTO.valueOf(album);
+    }
+
+    @Override
+    @Transactional
+    public void update(Long id, @Valid AlbumDTO dto) {
+        Album album = albumRepository.findById(id);
+        if (album == null)
+            throw ValidationException.of("id", "Álbum não encontrado.");
+        updateEntityFromDTO(album, dto);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!albumRepository.deleteById(id))
+            throw ValidationException.of("id", "Álbum não encontrado.");
+    }
+
+    // ========================
+    // UPDATE ENTITY
+    // ========================
+    private void updateEntityFromDTO(Album album, AlbumDTO dto) {
+        album.setTitulo(dto.titulo());
+        album.setDescricao(dto.descricao());
+        album.setLancamento(dto.lancamento());
+
+        Formato formato = toFormato(dto.idFormato());
+        album.setFormato(formato);
+
+        Producao p = producaoRepository.findById(dto.idProducao());
+        if (p == null)
+            throw ValidationException.of("producao", "Produção não encontrada.");
+        album.setProducao(p);
+
+        List<ProjetoMusical> projetos = dto.idProjetoMusical().stream()
+            .map(id -> {
+                ProjetoMusical pm = artistaRepository.findById(id);
+                if (pm == null) pm = grupoRepository.findById(id);
+                if (pm == null)
+                    throw ValidationException.of("projetoMusical", "Projeto não encontrado: " + id);
+                return pm;
+            }).toList();
+        album.setProjetoMusical(projetos);
+
+        List<Genero> generos = dto.idGenero().stream()
+            .map(id -> {
+                Genero g = generoRepository.findById(id);
+                if (g == null)
+                    throw ValidationException.of("genero", "Gênero não encontrado: " + id);
+                return g;
+            }).toList();
+        album.setGeneros(generos);
+    }
+
+    // ========================
+    // CONSULTAS COM PAGINAÇÃO
+    // ========================
+    @Override
+    public List<AlbumResponseDTO> findByAnoLancamento(int ano, int page, int pageSize) {
+        return albumRepository.findByAnoLancamento(ano, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByFormato(Long idFormato, int page, int pageSize) {
+        return albumRepository.findByFormato(toFormato(idFormato), page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByArtistaPrincipal(Long id, int page, int pageSize) {
+        return albumRepository.findByProjetoMusicalId(id, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findColaboracoesEntre(Long id1, Long id2, int page, int pageSize) {
+        return albumRepository.findColaboracoesEntre(id1, id2, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByEmpresaProducao(Long id, int page, int pageSize) {
+        return albumRepository.findByEmpresaProducao(id, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByProdutor(String nome, int page, int pageSize) {
+        return albumRepository.findByProdutor(nome, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByEngenheiroMixagem(String nome, int page, int pageSize) {
+        return albumRepository.findByEngenheiroMixagem(nome, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByEngenheiroMasterizacao(String nome, int page, int pageSize) {
+        return albumRepository.findByEngenheiroMasterizacao(nome, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByGenero(Long id, int page, int pageSize) {
+        return albumRepository.findByGeneroId(id, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByParticipacao(Long id, int page, int pageSize) {
+        return albumRepository.findByParticipacao(id, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    @Override
+    public List<AlbumResponseDTO> findByFaixaTitulo(String titulo, int page, int pageSize) {
+        return albumRepository.findByFaixaTitulo(titulo, page, pageSize)
+                .stream().map(AlbumResponseDTO::valueOf).toList();
+    }
+
+    // ========================
+    // ENUM
+    // ========================
+    private Formato toFormato(Long idFormato) {
+        if (idFormato == null)
+            throw ValidationException.of("formato", "Formato inválido.");
+
+        Formato[] values = Formato.values();
+        int index = idFormato.intValue() - 1;
+
+        if (index < 0 || index >= values.length)
+            throw ValidationException.of("formato", "Formato inválido.");
+
+        return values[index];
+    }
+
+    /*@Override
     public List<AlbumResponseDTO> findAll() {
         return albumRepository.listAll().stream().map(AlbumResponseDTO::valueOf).toList();
     }
@@ -55,6 +237,24 @@ public class AlbumServiceImpl implements AlbumService {
         albumRepository.persist(album);
         return AlbumResponseDTO.valueOf(album);
     }
+// COUNT
+    @Override
+public long count() {
+    return albumRepository.count();
+}
+//COUNT 
+
+// PAGINAÇÃO
+@Override
+public List<AlbumResponseDTO> findAll(int page, int pageSize) {
+    return albumRepository.findAll()
+            .page(page, pageSize)
+            .list()
+            .stream()
+            .map(AlbumResponseDTO::valueOf)
+            .toList();
+}
+// PAGINAÇÃO
 
     @Override
     @Transactional
@@ -183,5 +383,5 @@ public class AlbumServiceImpl implements AlbumService {
             throw ValidationException.of("formato", "Formato inválido.");
 
         return values[index];
-    }
+    }*/
 }
