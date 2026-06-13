@@ -12,11 +12,14 @@ public record PedidoResponseDTO(
     String status,
     String observacao,
 
-    /*Long idUsuario,*/
+    UsuarioPedidoResponseDTO usuario,
 
     EnderecoResponseDTO endereco,
 
     List<ItemPedidoResponseDTO> itens,
 
-    PagamentoResponseDTO pagamento
+    PagamentoResponseDTO pagamento,
+
+    String codigoCupom,
+    BigDecimal valorDesconto
 ) {}

@@ -25,13 +25,28 @@ public class ArtistaServiceImpl implements ArtistaService {
     @Inject ArtistaRepository artistaRepository;
     @Inject EmpresaRepository empresaRepository;
 
-    @Override
+    /*@Override
     public List<ArtistaResponseDTO> findAll() {
         return artistaRepository.listAll()
                 .stream()
                 .map(ArtistaResponseDTO::valueOf)
                 .toList();
-    }
+    }*/
+
+    @Override
+public List<ArtistaResponseDTO> findAll(int page, int pageSize) {
+    return artistaRepository.findAll()
+        .page(page, pageSize)
+        .list()
+        .stream()
+        .map(ArtistaResponseDTO::valueOf)
+        .toList();
+}
+
+@Override
+public long count() {
+    return artistaRepository.count();
+}
 
     @Override
     public ArtistaResponseDTO findById(Long id) {

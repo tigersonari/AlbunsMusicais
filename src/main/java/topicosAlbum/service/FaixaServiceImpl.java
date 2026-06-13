@@ -26,10 +26,23 @@ public class FaixaServiceImpl implements FaixaService {
     @Inject GeneroRepository generoRepository;
     @Inject ComposicaoRepository composicaoRepository;
 
-    @Override
+    /*@Override
     public List<FaixaResponseDTO> findAll() {
         return faixaRepository.listAll().stream().map(FaixaResponseDTO::valueOf).toList();
-    }
+    }*/
+
+        public List<FaixaResponseDTO> findAll(int page, int pageSize) {
+    return faixaRepository.findAll()
+        .page(page, pageSize)
+        .list()
+        .stream()
+        .map(FaixaResponseDTO::valueOf)
+        .toList();
+}
+
+public long count() {
+    return faixaRepository.count();
+}
 
     @Override
     public FaixaResponseDTO findById(Long id) {

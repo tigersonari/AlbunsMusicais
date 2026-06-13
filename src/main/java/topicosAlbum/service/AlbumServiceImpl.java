@@ -97,6 +97,7 @@ public class AlbumServiceImpl implements AlbumService {
         album.setTitulo(dto.titulo());
         album.setDescricao(dto.descricao());
         album.setLancamento(dto.lancamento());
+        album.setCapaUrl(dto.capaUrl());
 
         Formato formato = toFormato(dto.idFormato());
         album.setFormato(formato);

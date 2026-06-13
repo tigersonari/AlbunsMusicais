@@ -8,7 +8,10 @@ import topicosAlbum.dto.FaixaResponseDTO;
 
 public interface FaixaService {
 
-    List<FaixaResponseDTO> findAll();
+    //List<FaixaResponseDTO> findAll();
+    List<FaixaResponseDTO> findAll(int page, int pageSize); // Método para paginação
+    long count();
+
     FaixaResponseDTO findById(Long id);
     List<FaixaResponseDTO> findByTitulo(String titulo);
     List<FaixaResponseDTO> findByAlbum(Long idAlbum);

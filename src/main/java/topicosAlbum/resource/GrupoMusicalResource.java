@@ -13,6 +13,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import topicosAlbum.dto.GrupoMusicalDTO;
@@ -29,12 +30,26 @@ public class GrupoMusicalResource {
     GrupoMusicalService service;
 
     // ---- CRUD ----
-    @GET
+    /*@GET
     @RolesAllowed({"ADM", "USER"})
     public Response findAll() {
         LOG.info(">>> [GrupoMusicalResource] GET /grupos-musicais chamado para listar todos os grupos musicais");
         return Response.ok(service.findAll()).build();
-    }
+    }*/
+   @GET
+@RolesAllowed({"ADM", "USER"})
+public Response findAll(@QueryParam("page") int page,
+                        @QueryParam("pageSize") int pageSize) {
+
+    return Response.ok(service.findAll(page, pageSize)).build();
+}
+
+@GET
+@Path("/count")
+@RolesAllowed({"ADM", "USER"})
+public long count() {
+    return service.count();
+}
 
     @GET
     @Path("/{id}")
@@ -92,7 +107,7 @@ public class GrupoMusicalResource {
     @GET 
     @Path("/ativos")
     @RolesAllowed({"ADM", "USER"})
-    public Response findAtivos() {
+public Response findAtivos() {
         LOG.info(">>> [GrupoMusicalResource] GET /grupos-musicais/ativos chamado para buscar grupos musicais ativos");
         return Response.ok(service.findAtivos()).build();
     }

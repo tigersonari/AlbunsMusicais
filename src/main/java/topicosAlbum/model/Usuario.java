@@ -17,6 +17,9 @@ public class Usuario extends DefaultEntity {
     
     private Perfil perfil;
 
+    private String tokenRecuperacaoSenha;
+    private java.time.LocalDateTime tokenRecuperacaoExpiracao;
+
     public String getNome() {
         return nome;
     }
@@ -65,6 +68,22 @@ public class Usuario extends DefaultEntity {
         this.telefone = telefone;
     }
 
+    // Getters e setters para token de recuperação de senha
+    public String getTokenRecuperacaoSenha() {
+    return tokenRecuperacaoSenha;
+    }
+
+    public void setTokenRecuperacaoSenha(String tokenRecuperacaoSenha) {
+        this.tokenRecuperacaoSenha = tokenRecuperacaoSenha;
+    }
+
+    public java.time.LocalDateTime getTokenRecuperacaoExpiracao() {
+        return tokenRecuperacaoExpiracao;
+    }
+
+    public void setTokenRecuperacaoExpiracao(java.time.LocalDateTime tokenRecuperacaoExpiracao) {
+        this.tokenRecuperacaoExpiracao = tokenRecuperacaoExpiracao;
+    }
    
     
 

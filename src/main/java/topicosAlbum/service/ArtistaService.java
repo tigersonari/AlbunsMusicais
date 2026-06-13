@@ -12,7 +12,9 @@ import topicosAlbum.dto.GrupoMusicalResponseDTO;
 
 public interface ArtistaService {
 
-    List<ArtistaResponseDTO> findAll();
+    //List<ArtistaResponseDTO> findAll();
+    List<ArtistaResponseDTO> findAll(int page, int pageSize);
+    long count();
     ArtistaResponseDTO findById(Long id);
     ArtistaResponseDTO create(@Valid ArtistaDTO dto);
     void update(Long id, @Valid ArtistaDTO dto);

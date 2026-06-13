@@ -1,0 +1,55 @@
+@startuml
+
+class Gestor {
+  id: Long
+  nome: String
+  email: String
+}
+
+class Indicador {
+  id: Long
+  nome: String
+  valor: Double
+  dataReferencia: Date
+}
+
+class PainelGerencial {
+  id: Long
+  dataInicio: Date
+  dataFim: Date
+  + filtrarIndicadores()
+}
+
+class Relatorio {
+  id: Long
+  tipo: String
+  dataInicio: Date
+  dataFim: Date
+  conteudo: String
+  + gerarRelatorio()
+  + exportarRelatorio()
+}
+
+class Ocorrencia {
+  id: Long
+  titulo: String
+  descricao: String
+  data: Date
+  prioridade: String
+  + registrarOcorrencia()
+}
+
+class Alerta {
+  id: Long
+  descricao: String
+  status: String
+  + marcarComoResolvido()
+}
+
+Gestor "1" -- "1" PainelGerencial
+PainelGerencial "1" -- "*" Indicador
+Gestor "1" -- "*" Relatorio
+Gestor "1" -- "*" Ocorrencia
+Gestor "1" -- "*" Alerta
+
+@enduml

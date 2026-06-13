@@ -8,9 +8,11 @@ import jakarta.transaction.Transactional;
 import topicosAlbum.dto.ParticipacaoDTO;
 import topicosAlbum.dto.ParticipacaoResponseDTO;
 import topicosAlbum.exception.ValidationException;
+import topicosAlbum.model.Faixa;
 import topicosAlbum.model.Participacao;
 import topicosAlbum.model.ProjetoMusical;
 import topicosAlbum.repository.ArtistaRepository;
+import topicosAlbum.repository.FaixaRepository;
 import topicosAlbum.repository.GrupoMusicalRepository;
 import topicosAlbum.repository.ParticipacaoRepository;
 
@@ -20,6 +22,7 @@ public class ParticipacaoServiceImpl implements ParticipacaoService {
     @Inject ParticipacaoRepository participacaoRepository;
     @Inject ArtistaRepository artistaRepository;
     @Inject GrupoMusicalRepository grupoRepository;
+    @Inject FaixaRepository faixaRepository;
 
     @Override
     public List<ParticipacaoResponseDTO> findAll() {
@@ -64,6 +67,15 @@ public class ParticipacaoServiceImpl implements ParticipacaoService {
             }).toList();
 
         p.setProjetoMusical(projetos);
+        if (dto.idFaixa() != null) {
+    Faixa faixa = faixaRepository.findById(dto.idFaixa());
+
+    if (faixa == null) {
+        throw ValidationException.of("faixa", "Faixa não encontrada.");
+    }
+
+    p.setFaixa(faixa);
+}
     }
 
     @Override

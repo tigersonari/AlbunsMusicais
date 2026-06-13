@@ -3,20 +3,23 @@ package topicosAlbum.service;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import topicosAlbum.dto.AlbumResponseDTO;
+import topicosAlbum.dto.ArtistaResponseDTO;
 import topicosAlbum.dto.EmpresaDTO;
 import topicosAlbum.dto.EmpresaResponseDTO;
-import topicosAlbum.dto.ArtistaResponseDTO;
 import topicosAlbum.dto.GrupoMusicalResponseDTO;
-import topicosAlbum.dto.AlbumResponseDTO;
 
 public interface EmpresaService {
     
     // CRUD
-    List<EmpresaResponseDTO> findAll();
+    //List<EmpresaResponseDTO> findAll();
+    List<EmpresaResponseDTO> findAll(int page, int pageSize);
     EmpresaResponseDTO findById(Long id);
     EmpresaResponseDTO create(@Valid EmpresaDTO dto);
     void update(Long id, @Valid EmpresaDTO dto);
     void delete(Long id);
+    
+    long count();
 
     // Buscas básicas
     List<EmpresaResponseDTO> findByNome(String nomeEmpresa);

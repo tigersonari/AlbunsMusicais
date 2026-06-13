@@ -25,10 +25,14 @@ public class EmpresaServiceImpl implements EmpresaService {
     EmpresaRepository repository;
 
     @Override
-    public List<EmpresaResponseDTO> findAll() {
-        return repository.listAll()
-            .stream().map(EmpresaResponseDTO::valueOf).toList();
-    }
+    public List<EmpresaResponseDTO> findAll(int page, int pageSize) {
+    return repository.findAll()
+        .page(page, pageSize)
+        .list()
+        .stream()
+        .map(EmpresaResponseDTO::valueOf)
+        .toList();
+}
 
     @Override
     public EmpresaResponseDTO findById(Long id) {
@@ -139,5 +143,9 @@ public class EmpresaServiceImpl implements EmpresaService {
             .map(AlbumResponseDTO::valueOf)
             .toList();
     }
+
+    public long count() {
+    return repository.count();
+}
 
 }

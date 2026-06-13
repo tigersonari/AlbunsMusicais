@@ -21,4 +21,12 @@ PedidoResponseDTO findByIdSeguro(Long idPedido, Long idUsuarioToken, boolean isA
 
 void cancelarSeguro(Long idPedido, Long idUsuarioToken);
 
+long count();
+
+long countByStatus(String status);
+
+java.math.BigDecimal faturamentoTotal();
+
+List<PedidoResponseDTO> findAll();
+
 }

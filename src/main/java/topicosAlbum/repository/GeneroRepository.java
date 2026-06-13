@@ -29,4 +29,6 @@ public class GeneroRepository implements PanacheRepository<Genero> {
             .setParameter("idAlbum", idAlbum)
             .getResultList();
     }
+
+    
 }

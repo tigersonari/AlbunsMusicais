@@ -13,6 +13,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -29,12 +30,21 @@ public class GeneroResource {
     @Inject
     GeneroService service;
 
-    @GET
-    @RolesAllowed({"ADM", "USER"})
-    public Response findAll() {
+    /*@GET
+    // @RolesAllowed({"ADM", "USER"}) ATIVAR DE NOVO
+    @PermitAll
+    public Response findAll(@QueryParam("page") int page,
+                           @QueryParam("pageSize") int pageSize){ //adição de paginação
         LOG.info(">>> [GeneroResource] GET /generos chamado para listar todos os gêneros");
         return Response.ok(service.findAll()).build();
-    }
+    }*/
+   @GET
+@RolesAllowed({"ADM", "USER"})
+public Response findAll(@QueryParam("page") int page,
+                       @QueryParam("pageSize") int pageSize){
+    return Response.ok(service.findAll(page, pageSize)).build();
+}
+
 
     @GET
     @Path("/{id}")
@@ -45,8 +55,8 @@ public class GeneroResource {
     }
 
     @GET
-    @Path("/search/{nomeGenero}")
-    @RolesAllowed({"ADM", "USER"})
+    @Path("/find/nome/{nomeGenero}")
+    @RolesAllowed({"ADM", "USER"}) 
     public Response findByNome(@PathParam("nomeGenero") String nomeGenero) {
         LOG.info(">>> [GeneroResource] GET /generos/search/{nomeGenero} chamado para buscar gênero por nome");
         return Response.ok(service.findByNome(nomeGenero)).build();
@@ -85,4 +95,11 @@ public class GeneroResource {
         service.delete(id);
         return Response.noContent().build();
     }
+
+    @GET
+@Path("/count")
+@RolesAllowed({"ADM", "USER"})
+public long count() {
+    return service.count(); //nova adição 17/04/2026
+}
 }

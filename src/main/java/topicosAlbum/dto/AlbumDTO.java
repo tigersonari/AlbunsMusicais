@@ -13,5 +13,6 @@ public record AlbumDTO(
     @NotNull Long idFormato,
     @NotNull Long idProducao,
     @NotNull List<Long> idProjetoMusical,
-    @NotNull List<Long> idGenero
+    @NotNull List<Long> idGenero,
+    String capaUrl
 ) {}

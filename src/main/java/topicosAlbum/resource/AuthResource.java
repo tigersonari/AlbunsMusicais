@@ -1,6 +1,7 @@
 package topicosAlbum.resource;
 
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -32,6 +33,7 @@ public class AuthResource {
     UsuarioService usuarioService;
 
     @POST
+    @PermitAll
     public Response login(@Valid AuthDTO dto) {
         try {
             // 1) gera hash da senha informada

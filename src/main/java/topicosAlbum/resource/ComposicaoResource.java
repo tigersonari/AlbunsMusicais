@@ -15,6 +15,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import topicosAlbum.dto.ComposicaoDTO;
@@ -29,12 +30,26 @@ public class ComposicaoResource {
 
     @Inject ComposicaoService service;
 
-    @GET
+    /*@GET
     @RolesAllowed({"ADM", "USER"})
     public Response findAll() {
         LOG.info(">>> [ComposicaoResource] GET /composicoes chamado para buscar todas as composicoes");
         return Response.ok(service.findAll()).build();
-    }
+    }*/
+   @GET
+@RolesAllowed({"ADM", "USER"})
+public Response findAll(@QueryParam("page") int page,
+                       @QueryParam("pageSize") int pageSize){
+    return Response.ok(service.findAll(page, pageSize)).build();
+}
+
+@GET
+@Path("/count")
+@RolesAllowed({"ADM", "USER"})
+public long count() {
+    return service.count();
+}
+
 
     @GET @Path("/{id}")
     @RolesAllowed("ADM")

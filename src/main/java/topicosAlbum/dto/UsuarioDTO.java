@@ -16,7 +16,9 @@ public record UsuarioDTO (
     
     @NotBlank
     @Length(min= 11, max = 11)
-    String telefone
+    String telefone,
+
+    String perfil
 ) {
 
 }

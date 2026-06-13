@@ -17,13 +17,21 @@ public class GeneroServiceImpl implements GeneroService {
     @Inject
     GeneroRepository repository;
 
-    @Override
+    /*@Override
     public List<GeneroResponseDTO> findAll() {
         return repository.listAll()
             .stream()
             .map(GeneroResponseDTO::valueOf)
             .toList();
-    }
+    }*/
+   public List<GeneroResponseDTO> findAll(int page, int pageSize) {
+    return repository.findAll()
+            .page(page, pageSize)
+            .list()
+            .stream()
+            .map(GeneroResponseDTO::valueOf)
+            .toList();
+}
 
     @Override
     public GeneroResponseDTO findById(Long id) {
@@ -96,6 +104,10 @@ public class GeneroServiceImpl implements GeneroService {
                 throw ValidationException.of("nomeGenero", "Esse gênero já está cadastrado.");
         }
     }
+
+    public long count() {
+    return repository.count();
+} //nova adição 17/04/2026
 
     
 }

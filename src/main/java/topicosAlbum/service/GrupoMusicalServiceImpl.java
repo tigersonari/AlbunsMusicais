@@ -6,8 +6,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-
-import topicosAlbum.dto.*;
+import topicosAlbum.dto.AlbumResponseDTO;
+import topicosAlbum.dto.ArtistaResponseDTO;
+import topicosAlbum.dto.ComposicaoResponseDTO;
+import topicosAlbum.dto.FaixaResponseDTO;
+import topicosAlbum.dto.GrupoMusicalDTO;
+import topicosAlbum.dto.GrupoMusicalResponseDTO;
 import topicosAlbum.exception.ValidationException;
 import topicosAlbum.model.Artista;
 import topicosAlbum.model.Empresa;
@@ -23,12 +27,27 @@ public class GrupoMusicalServiceImpl implements GrupoMusicalService {
     @Inject ArtistaRepository artistaRepository;
     @Inject EmpresaRepository empresaRepository;
 
-    @Override
+    /*@Override
     public List<GrupoMusicalResponseDTO> findAll() {
         return grupoRepository.listAll().stream()
                 .map(GrupoMusicalResponseDTO::valueOf)
                 .toList();
-    }
+    }*/
+
+    @Override
+public List<GrupoMusicalResponseDTO> findAll(int page, int pageSize) {
+    return grupoRepository.findAll()
+        .page(page, pageSize)
+        .list()
+        .stream()
+        .map(GrupoMusicalResponseDTO::valueOf)
+        .toList();
+}
+
+@Override
+public long count() {
+    return grupoRepository.count();
+}
 
     @Override
     public GrupoMusicalResponseDTO findById(Long id) {

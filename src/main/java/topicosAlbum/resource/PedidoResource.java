@@ -47,6 +47,12 @@ public class PedidoResource {
             .build();
     }
 
+    @GET
+@RolesAllowed("ADM")
+public Response buscarTodos() {
+    return Response.ok(service.findAll()).build();
+}
+
     // ---------------- BUSCAR POR ID ----------------
     @GET
     @Path("/{id}")
@@ -94,5 +100,27 @@ public class PedidoResource {
 
         return Response.noContent().build();
     }
+
+
+    @GET
+@Path("/count")
+@RolesAllowed("ADM")
+public Response count() {
+    return Response.ok(service.count()).build();
+}
+
+@GET
+@Path("/count/status/{status}")
+@RolesAllowed("ADM")
+public Response countByStatus(@PathParam("status") String status) {
+    return Response.ok(service.countByStatus(status)).build();
+}
+
+@GET
+@Path("/faturamento")
+@RolesAllowed("ADM")
+public Response faturamentoTotal() {
+    return Response.ok(service.faturamentoTotal()).build();
+}
 
 }

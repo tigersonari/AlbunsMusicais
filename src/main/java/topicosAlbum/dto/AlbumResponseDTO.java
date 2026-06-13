@@ -18,7 +18,8 @@ public record AlbumResponseDTO(
     Formato formato,
     ProducaoResponseDTO producao,
     List<ProjetoMusicalResponseDTO> artistasPrincipais,
-    List<GeneroResponseDTO> generos
+    List<GeneroResponseDTO> generos,
+    String capaUrl
 ) {
 
     public static AlbumResponseDTO valueOf(Album album) {
@@ -39,7 +40,8 @@ public record AlbumResponseDTO(
                         .stream()
                         .map(GeneroResponseDTO::valueOf)
                         .collect(Collectors.toList())
-                : List.of()
+                : List.of(),
+                album.getCapaUrl()
         );
     }
 

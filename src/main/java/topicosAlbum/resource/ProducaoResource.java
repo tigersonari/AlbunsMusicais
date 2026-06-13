@@ -39,6 +39,19 @@ public class ProducaoResource {
         return Response.ok(service.findAll()).build();
     }
 
+        /*@GET
+        @PermitAll
+public Response findAll(@QueryParam("page") int page,
+                        @QueryParam("pageSize") int pageSize) {
+    return Response.ok(service.findAll(page, pageSize)).build();
+}
+
+@GET
+@Path("/count")
+public long count() {
+    return service.count();
+}*/
+
     @GET
     @Path("/{id}")
     @RolesAllowed("ADM")
@@ -67,7 +80,7 @@ public class ProducaoResource {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("ADM")
+   @RolesAllowed("ADM")
     public Response apagar(@PathParam("id") Long id) {
         LOG.info(">>> [ProducaoResource] DELETE /producoes/{id} chamado para deletar produção");
         service.delete(id);
@@ -78,7 +91,7 @@ public class ProducaoResource {
 
     @GET
     @Path("/find/produtor/{nome}")
-    @RolesAllowed({"ADM", "USER"})
+   @RolesAllowed({"ADM", "USER"})
     public Response buscarPorProdutor(@PathParam("nome") String nome) {
         LOG.info(">>> [ProducaoResource] GET /producoes/find/produtor/{nome} chamado para buscar produções por produtor");
         return Response.ok(service.findByProdutor(nome)).build();

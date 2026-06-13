@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -21,6 +22,8 @@ public class Album extends DefaultEntity {
     private String titulo;
     private LocalDate lancamento;
     private String descricao;
+    @Column(name = "capa_url")
+    private String capaUrl;
 
     @OneToOne
     @JoinColumn(name = "idProducao")
@@ -135,6 +138,12 @@ public class Album extends DefaultEntity {
         this.generos = generos;
     }
 
-    
+    public String getCapaUrl() {
+    return capaUrl;
+}
+
+    public void setCapaUrl(String capaUrl) {
+        this.capaUrl = capaUrl;
+    }
 
 }

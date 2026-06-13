@@ -96,6 +96,7 @@ public class AlbumResource {
     // BUSCAS COM PAGINAÇÃO
     // ========================
     @GET
+    @RolesAllowed({"ADM", "USER"})
     @Path("/find/titulo/{titulo}")
     public Response buscarPorTitulo(@PathParam("titulo") String titulo,
         @QueryParam("page") @DefaultValue("0") int page,
@@ -106,6 +107,7 @@ public class AlbumResource {
     }
 
     @GET
+    @RolesAllowed({"ADM", "USER"})
     @Path("/find/ano/{ano}")
     public Response buscarPorAno(@PathParam("ano") int ano,
         @QueryParam("page") @DefaultValue("0") int page,
@@ -116,6 +118,7 @@ public class AlbumResource {
     }
 
     @GET
+    @RolesAllowed({"ADM", "USER"})
     @Path("/find/formato/{id}")
     public Response buscarPorFormato(@PathParam("id") Long id,
         @QueryParam("page") @DefaultValue("0") int page,
@@ -126,6 +129,7 @@ public class AlbumResource {
     }
 
     @GET
+    @RolesAllowed({"ADM", "USER"})
     @Path("/find/genero/{id}")
     public Response buscarPorGenero(@PathParam("id") Long id,
         @QueryParam("page") @DefaultValue("0") int page,

@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import topicosAlbum.dto.AtualizarPerfilDTO;
 import topicosAlbum.dto.UsuarioDTO;
 import topicosAlbum.dto.UsuarioResponseDTO;
 import topicosAlbum.exception.ValidationException;
@@ -76,6 +77,100 @@ public UsuarioResponseDTO create(UsuarioDTO dto) {
     return UsuarioResponseDTO.valueOf(u);
 }
 
+@Inject
+HashService hashService;
 
+@Override
+@Transactional
+public void alterarSenha(Long idUsuario, String senhaAtual, String novaSenha) {
+    Usuario usuario = repository.findById(idUsuario);
+
+    if (usuario == null) {
+        throw ValidationException.of("usuario", "Usuário não encontrado.");
+    }
+
+    String hashSenhaAtual = hashService.getHashSenha(senhaAtual);
+
+    if (!usuario.getSenha().equals(hashSenhaAtual)) {
+        throw ValidationException.of("senhaAtual", "Senha atual incorreta.");
+    }
+
+    usuario.setSenha(hashService.getHashSenha(novaSenha));
+}
+
+@Override
+@Transactional
+public UsuarioResponseDTO atualizarPerfil(Long idUsuario, AtualizarPerfilDTO dto) {
+    Usuario usuario = repository.findById(idUsuario);
+
+    if (usuario == null) {
+        throw ValidationException.of("usuario", "Usuário não encontrado.");
+    }
+
+    String hashConfirmacao = hashService.getHashSenha(dto.senhaConfirmacao());
+
+    if (!usuario.getSenha().equals(hashConfirmacao)) {
+        throw ValidationException.of("senhaConfirmacao", "Senha incorreta.");
+    }
+
+    usuario.setNome(dto.nome());
+    usuario.setLogin(dto.login());
+    usuario.setEmail(dto.email());
+    usuario.setTelefone(dto.telefone());
+
+    return UsuarioResponseDTO.valueOf(usuario);
+}
+
+
+    // ---------------- RECUPERAÇÃO DE SENHA ----------------
+    // O usuário solicita a recuperação de senha, gerando um token e enviando por e-mail (simulado aqui)
+    // Depois, o usuário usa esse token para redefinir a senha
+    @Override
+    @Transactional
+    public String solicitarRecuperacaoSenha(String email) {
+        Usuario usuario = repository.find("email", email).firstResult();
+
+        if (usuario == null) {
+            throw ValidationException.of("email", "E-mail não encontrado.");
+        }
+
+        String token = java.util.UUID.randomUUID().toString();
+
+        usuario.setTokenRecuperacaoSenha(token);
+        usuario.setTokenRecuperacaoExpiracao(java.time.LocalDateTime.now().plusMinutes(30));
+
+        return token;
+    }
+
+    // Redefinir senha usando o token gerado na solicitação de recuperação
+    @Override
+    @Transactional
+    public void redefinirSenha(String token, String novaSenha) {
+        Usuario usuario = repository.find("tokenRecuperacaoSenha", token).firstResult();
+
+        if (usuario == null) {
+            throw ValidationException.of("token", "Token inválido.");
+        }
+
+        if (usuario.getTokenRecuperacaoExpiracao() == null ||
+            usuario.getTokenRecuperacaoExpiracao().isBefore(java.time.LocalDateTime.now())) {
+            throw ValidationException.of("token", "Token expirado.");
+        }
+
+        usuario.setSenha(hashService.getHashSenha(novaSenha));
+        usuario.setTokenRecuperacaoSenha(null);
+        usuario.setTokenRecuperacaoExpiracao(null);
+    }
+
+    @Override
+public void promoverParaAdmin(Long idUsuario) {
+    Usuario usuario = findById(idUsuario);
+
+    if (usuario == null) {
+        throw new RuntimeException("Usuário não encontrado.");
+    }
+
+    usuario.setPerfil(Perfil.ADM);
+}
 
 }

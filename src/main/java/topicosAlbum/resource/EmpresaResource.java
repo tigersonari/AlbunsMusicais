@@ -13,6 +13,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -31,10 +32,10 @@ public class EmpresaResource {
 
     @GET
     @RolesAllowed({"ADM", "USER"})
-    public Response getAll() {
-        LOG.info(">>> [EmpresaResource] GET /empresas chamado para buscar todas as empresas");
-        return Response.ok(service.findAll()).build();
-    }
+    public Response findAll(@QueryParam("page") int page,
+                       @QueryParam("pageSize") int pageSize){
+    return Response.ok(service.findAll(page, pageSize)).build();
+}
 
     @GET
     @Path("/{id}")
@@ -72,11 +73,11 @@ public class EmpresaResource {
     // ---------- FINDERS ----------
     
     @GET
-    @Path("/find/nome/{nome}")
+    @Path("/find/nome/{nomeEmpresa}")
     @RolesAllowed({"ADM", "USER"})
-    public Response findByNome(@PathParam("nome") String nome) {
-        LOG.info(">>> [EmpresaResource] GET /empresas chamado para buscar empresas por nome");
-        return Response.ok(service.findByNome(nome)).build();
+    public Response findByNome(@PathParam("nomeEmpresa") String nomeEmpresa) {
+        LOG.info(">>> [EmpresaResource] GET /empresas/search/{nomeEmpresa} chamado para buscar empresas por nome");
+        return Response.ok(service.findByNome(nomeEmpresa)).build();
     }
 
     @GET
@@ -136,4 +137,12 @@ public class EmpresaResource {
         LOG.info(">>> [EmpresaResource] GET /empresas chamado para buscar albuns lancados por uma empresa");
         return Response.ok(service.findAlbunsLancados(id)).build();
     }
+
+
+    @GET
+@Path("/count")
+@RolesAllowed({"ADM", "USER"})
+public long count() {
+    return service.count();
+} //adicionado hoje para teste de paginação
 }

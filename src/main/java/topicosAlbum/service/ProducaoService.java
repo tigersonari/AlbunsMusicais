@@ -9,6 +9,8 @@ import topicosAlbum.dto.ProducaoResponseDTO;
 
 public interface ProducaoService {
     List<ProducaoResponseDTO> findAll();
+    //List<ProducaoResponseDTO> findAll(int page, int pageSize);
+    //long count();
     ProducaoResponseDTO findById(Long id);
     ProducaoResponseDTO create(@Valid ProducaoDTO dto);
     void update(Long id, @Valid ProducaoDTO dto);

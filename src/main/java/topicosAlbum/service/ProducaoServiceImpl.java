@@ -24,7 +24,7 @@ public class ProducaoServiceImpl implements ProducaoService {
     @Inject
     EmpresaRepository empresaRepository;
 
-    @Override
+   @Override
     public List<ProducaoResponseDTO> findAll() {
         return producaoRepository.listAll()
                 .stream().map(ProducaoResponseDTO::valueOf).toList();

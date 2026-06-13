@@ -14,10 +14,13 @@ public record PedidoDTO(
    EnderecoDTO endereco,
 
     String observacao,
+    
 
     @NotEmpty
     List<ItemPedidoDTO> itens,
 
     @NotNull
-    PagamentoDTO pagamento
+    PagamentoDTO pagamento,
+
+    String codigoCupom
 ) {}

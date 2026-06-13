@@ -13,6 +13,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import topicosAlbum.dto.FaixaDTO;
@@ -28,12 +29,27 @@ public class FaixaResource {
     @Inject 
     FaixaService service;
 
-    @GET
+    /*@GET
     @RolesAllowed({"ADM", "USER"})
     public Response findAll() {
         LOG.info(">>> [FaixaResource] GET /faixas chamado para listar todas as faixas");
         return Response.ok(service.findAll()).build();
-    }
+    }*/
+
+        @GET
+@RolesAllowed({"ADM", "USER"})
+public Response findAll(@QueryParam("page") int page,
+                       @QueryParam("pageSize") int pageSize){
+    return Response.ok(service.findAll(page, pageSize)).build();
+}
+
+@GET
+@Path("/count")
+@RolesAllowed({"ADM", "USER"})
+public long count() {
+    return service.count();
+}
+
 
     @GET
     @Path("/{id}")

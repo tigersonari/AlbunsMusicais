@@ -9,7 +9,10 @@ import topicosAlbum.dto.ComposicaoResponseDTO;
 
 public interface ComposicaoService {
 
-    List<ComposicaoResponseDTO> findAll();
+    //List<ComposicaoResponseDTO> findAll();
+    List<ComposicaoResponseDTO> findAll(int page, int pageSize); // Método para paginação
+    long count();
+
     ComposicaoResponseDTO findById(Long id);
     ComposicaoResponseDTO create(@Valid ComposicaoDTO dto);
     void update(Long id, @Valid ComposicaoDTO dto);

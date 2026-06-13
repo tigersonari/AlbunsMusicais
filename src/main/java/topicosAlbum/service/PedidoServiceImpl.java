@@ -15,6 +15,7 @@ import topicosAlbum.dto.PagamentoDTO;
 import topicosAlbum.dto.PagamentoResponseDTO;
 import topicosAlbum.dto.PedidoDTO;
 import topicosAlbum.dto.PedidoResponseDTO;
+import topicosAlbum.dto.UsuarioPedidoResponseDTO;
 import topicosAlbum.exception.ValidationException;
 import topicosAlbum.model.CartaoSalvo;
 import topicosAlbum.model.Endereco;
@@ -43,44 +44,46 @@ public class PedidoServiceImpl implements PedidoService {
     @Inject EstoqueService estoqueService;
     @Inject ItemPedidoService itemPedidoService;
 
-    
-    //               CRIAR PEDIDO COM REGRA DE USUÁRIO LOGADO
+    // CRIAR PEDIDO COM REGRA DE USUÁRIO LOGADO
+    @Override
     @Transactional
     public PedidoResponseDTO createParaUsuario(PedidoDTO dto, Long idUsuarioToken) {
 
         Usuario usuario = usuarioRepository.findById(idUsuarioToken);
-        if (usuario == null)
+        if (usuario == null) {
             throw ValidationException.of("usuario", "Usuário autenticado não encontrado.");
+        }
 
-        // ENDEREÇO
         Endereco endereco = null;
 
-        // Se NÃO enviaram idEnderecoEntrega e também NÃO enviaram enderecoNovo = erro
         if (dto.idEnderecoEntrega() == null && dto.endereco() == null) {
-            throw ValidationException.of("endereco", 
-                    "É necessário informar um idEnderecoEntrega OU um novo endereço.");
+            throw ValidationException.of(
+                "endereco",
+                "É necessário informar um idEnderecoEntrega OU um novo endereço."
+            );
         }
 
-        // Se enviaram AMBOS = conflito
         if (dto.idEnderecoEntrega() != null && dto.endereco() != null) {
-            throw ValidationException.of("endereco", 
-                    "Não é permitido informar idEnderecoEntrega e um novo endereço ao mesmo tempo.");
+            throw ValidationException.of(
+                "endereco",
+                "Não é permitido informar idEnderecoEntrega e um novo endereço ao mesmo tempo."
+            );
         }
 
-        // Se enviaram idEnderecoEntrega = buscar endereço existente
         if (dto.idEnderecoEntrega() != null) {
             endereco = enderecoRepository.findById(dto.idEnderecoEntrega());
-        
-            if (endereco == null)
-                throw ValidationException.of("endereco", "Endereço não encontrado.");
-        
-            if (!endereco.getUsuario().getId().equals(idUsuarioToken))
-                throw ValidationException.of("endereco", 
-                        "O endereço informado não pertence ao usuário autenticado.");
-        }
 
-        //  Se não enviaram idEnderecoEntrega = criar novo endereço
-        else {
+            if (endereco == null) {
+                throw ValidationException.of("endereco", "Endereço não encontrado.");
+            }
+
+            if (!endereco.getUsuario().getId().equals(idUsuarioToken)) {
+                throw ValidationException.of(
+                    "endereco",
+                    "O endereço informado não pertence ao usuário autenticado."
+                );
+            }
+        } else {
             Endereco novo = new Endereco();
             novo.setUsuario(usuario);
             novo.setRua(dto.endereco().rua());
@@ -90,13 +93,11 @@ public class PedidoServiceImpl implements PedidoService {
             novo.setCidade(dto.endereco().cidade());
             novo.setUf(dto.endereco().uf());
             novo.setCep(dto.endereco().cep());
-        
+
             enderecoRepository.persist(novo);
             endereco = novo;
         }
 
-
-        // CRIA PEDIDO
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
         pedido.setEnderecoEntrega(endereco);
@@ -105,43 +106,32 @@ public class PedidoServiceImpl implements PedidoService {
 
         pedidoRepository.persist(pedido);
 
-        // ITENS
         for (ItemPedidoDTO itemDTO : dto.itens()) {
 
             Produto produto = produtoRepository.findById(itemDTO.idProduto());
-            if (produto == null)
+            if (produto == null) {
                 throw ValidationException.of("produto", "Produto não encontrado.");
+            }
 
             estoqueService.verificarDisponibilidade(produto.getId(), itemDTO.quantidade());
-
-            /*ItemPedido item = new ItemPedido();
-            item.setPedido(pedido);
-            item.setProduto(produto);
-            item.setQuantidade(itemDTO.quantidade());
-            item.setPrecoUnitario(produto.getPreco());
-
-            itemPedidoService.salvar(item);*/
 
             ItemPedido item = new ItemPedido();
             item.setProduto(produto);
             item.setQuantidade(itemDTO.quantidade());
             item.setPrecoUnitario(produto.getPreco());
 
-            // ESSENCIAL: adicionar item dentro do pedido
             pedido.addItem(item);
-
-            // agora salva
             itemPedidoService.salvar(item);
-
         }
 
         pedido.recalcTotal();
+
+        aplicarCupomSeExistir(pedido, dto.codigoCupom());
 
         for (ItemPedido item : pedido.getItens()) {
             estoqueService.baixarEstoque(item.getProduto().getId(), item.getQuantidade());
         }
 
-        // PAGAMENTO
         Pagamento pagamento = processarPagamento(dto.pagamento(), pedido, usuario, idUsuarioToken);
 
         pagamentoRepository.persist(pagamento);
@@ -150,12 +140,40 @@ public class PedidoServiceImpl implements PedidoService {
         return toResponseDTO(pedido);
     }
 
-    //  PROCESSAMENTO DE PAGAMENTO
+    private void aplicarCupomSeExistir(Pedido pedido, String codigoCupom) {
+        if (codigoCupom == null || codigoCupom.isBlank()) {
+            pedido.setCodigoCupom(null);
+            pedido.setValorDesconto(java.math.BigDecimal.ZERO);
+            return;
+        }
+
+        String codigo = codigoCupom.trim().toUpperCase();
+
+        java.math.BigDecimal percentual;
+
+        switch (codigo) {
+            case "ALBUM10" -> percentual = new java.math.BigDecimal("10");
+            case "KPOP15" -> percentual = new java.math.BigDecimal("15");
+            case "FRETE20" -> percentual = new java.math.BigDecimal("20");
+            default -> throw ValidationException.of("cupom", "Cupom inválido.");
+        }
+
+        java.math.BigDecimal valorDesconto = pedido.getTotal()
+            .multiply(percentual)
+            .divide(new java.math.BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+
+        java.math.BigDecimal totalComDesconto = pedido.getTotal().subtract(valorDesconto);
+
+        pedido.setCodigoCupom(codigo);
+        pedido.setValorDesconto(valorDesconto);
+        pedido.setTotal(totalComDesconto);
+    }
+
     private Pagamento processarPagamento(
-            PagamentoDTO dto,
-            Pedido pedido,
-            Usuario usuario,
-            Long idUsuarioToken
+        PagamentoDTO dto,
+        Pedido pedido,
+        Usuario usuario,
+        Long idUsuarioToken
     ) {
         Pagamento pagamento = new Pagamento();
 
@@ -174,31 +192,37 @@ public class PedidoServiceImpl implements PedidoService {
 
             case "BOLETO" -> {
                 String linha = "34191.79001 01043.510047 91020.150008 1 000000" + pedido.getId();
-                String pdfBase64 = Base64.getEncoder().encodeToString(("BOLETO-" + pedido.getId()).getBytes());
+                String pdfBase64 = Base64.getEncoder()
+                    .encodeToString(("BOLETO-" + pedido.getId()).getBytes());
+
                 pagamento.setCodigoPagamento(linha + "|PDF:" + pdfBase64);
             }
 
             case "CARTAO" -> {
-                // Cartão salvo
                 if (dto.idCartaoSalvo() != null) {
 
-                    CartaoSalvo cartao = cartaoSalvoRepository.buscarDoUsuario(dto.idCartaoSalvo(), idUsuarioToken);
+                    CartaoSalvo cartao =
+                        cartaoSalvoRepository.buscarDoUsuario(dto.idCartaoSalvo(), idUsuarioToken);
 
-                    if (cartao == null)
-                        throw ValidationException.of("cartao", "Cartão salvo não encontrado ou não pertence ao usuário.");
+                    if (cartao == null) {
+                        throw ValidationException.of(
+                            "cartao",
+                            "Cartão salvo não encontrado ou não pertence ao usuário."
+                        );
+                    }
 
                     pagamento.setCodigoPagamento("TRANS-" + UUID.randomUUID());
                     pagamento.setUltimos4(cartao.getUltimos4());
                     pagamento.setBandeira(cartao.getBandeira());
                 }
 
-                // Novo cartão
                 else if (dto.numeroCartao() != null) {
 
                     String numero = dto.numeroCartao().replace(" ", "");
 
-                    if (numero.length() < 12)
+                    if (numero.length() < 12) {
                         throw ValidationException.of("cartao", "Número do cartão inválido.");
+                    }
 
                     CartaoSalvo novo = new CartaoSalvo();
                     novo.setUsuario(usuario);
@@ -216,7 +240,10 @@ public class PedidoServiceImpl implements PedidoService {
                 }
 
                 else {
-                    throw ValidationException.of("cartao", "Informe idCartaoSalvo OU dados de um novo cartão.");
+                    throw ValidationException.of(
+                        "cartao",
+                        "Informe idCartaoSalvo OU dados de um novo cartão."
+                    );
                 }
             }
 
@@ -228,28 +255,31 @@ public class PedidoServiceImpl implements PedidoService {
         return pagamento;
     }
 
-    // Detecta bandeira (simplificado)
     private String detectarBandeira(String numero) {
 
-        if (numero.startsWith("4"))
+        if (numero.startsWith("4")) {
             return "VISA";
+        }
 
-        if (numero.startsWith("5"))
+        if (numero.startsWith("5")) {
             return "MASTERCARD";
+        }
 
-        if (numero.startsWith("34") || numero.startsWith("37"))
+        if (numero.startsWith("34") || numero.startsWith("37")) {
             return "AMEX";
+        }
 
         return "DESCONHECIDA";
     }
 
-    //   BUSCAS / CANCELAMENTO
-
     @Override
     public PedidoResponseDTO findById(Long idPedido) {
         Pedido pedido = pedidoRepository.findById(idPedido);
-        if (pedido == null)
+
+        if (pedido == null) {
             throw ValidationException.of("id", "Pedido não encontrado.");
+        }
+
         return toResponseDTO(pedido);
     }
 
@@ -258,11 +288,13 @@ public class PedidoServiceImpl implements PedidoService {
 
         Pedido pedido = pedidoRepository.findById(idPedido);
 
-        if (pedido == null)
+        if (pedido == null) {
             throw ValidationException.of("id", "Pedido não encontrado.");
+        }
 
-        if (!isAdmin && !pedido.getUsuario().getId().equals(idUsuarioToken))
+        if (!isAdmin && !pedido.getUsuario().getId().equals(idUsuarioToken)) {
             throw ValidationException.of("acesso", "Você não pode ver pedidos de outro usuário.");
+        }
 
         return toResponseDTO(pedido);
     }
@@ -270,10 +302,18 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public List<PedidoResponseDTO> findByUsuario(Long idUsuario) {
         return pedidoRepository.findByUsuario(idUsuario)
-                .stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+            .stream()
+            .map(this::toResponseDTO)
+            .collect(Collectors.toList());
     }
+
+    @Override
+public List<PedidoResponseDTO> findAll() {
+    return pedidoRepository.listAll()
+        .stream()
+        .map(this::toResponseDTO)
+        .collect(Collectors.toList());
+}
 
     @Override
     @Transactional
@@ -281,14 +321,19 @@ public class PedidoServiceImpl implements PedidoService {
 
         Pedido pedido = pedidoRepository.findById(idPedido);
 
-        if (pedido == null)
+        if (pedido == null) {
             throw ValidationException.of("id", "Pedido não encontrado.");
+        }
 
-        if ("PAGO".equalsIgnoreCase(pedido.getStatus()))
+        if ("PAGO".equalsIgnoreCase(pedido.getStatus())) {
             throw ValidationException.of("status", "Pedido já foi pago.");
+        }
 
         pedido.setStatus("CANCELADO");
-        pedido.getPagamento().setStatus("REJEITADO");
+
+        if (pedido.getPagamento() != null) {
+            pedido.getPagamento().setStatus("REJEITADO");
+        }
 
         for (ItemPedido item : pedido.getItens()) {
             estoqueService.reporEstoque(item.getProduto().getId(), item.getQuantidade());
@@ -301,45 +346,68 @@ public class PedidoServiceImpl implements PedidoService {
 
         Pedido pedido = pedidoRepository.findById(idPedido);
 
-        if (pedido == null)
+        if (pedido == null) {
             throw ValidationException.of("id", "Pedido não encontrado.");
+        }
 
-        if (!pedido.getUsuario().getId().equals(idUsuarioToken))
+        if (!pedido.getUsuario().getId().equals(idUsuarioToken)) {
             throw ValidationException.of("acesso", "Você não pode cancelar pedidos de outro usuário.");
+        }
 
         cancelar(idPedido);
     }
 
-    //    DTO DE RESPOSTA
+    @Override
+    public long count() {
+        return pedidoRepository.count();
+    }
+
+    @Override
+    public long countByStatus(String status) {
+        return pedidoRepository.count("status", status);
+    }
+
+    @Override
+    public java.math.BigDecimal faturamentoTotal() {
+        return pedidoRepository.listAll()
+            .stream()
+            .filter(p -> "PAGO".equalsIgnoreCase(p.getStatus()))
+            .map(Pedido::getTotal)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+    }
+
     private PedidoResponseDTO toResponseDTO(Pedido pedido) {
 
         List<ItemPedidoResponseDTO> itensDTO = pedido.getItens()
-                .stream()
-                .map(item -> new ItemPedidoResponseDTO(
-                        item.getProduto().getId(),
-                        item.getProduto().getAlbum().getTitulo(),
-                        item.getQuantidade(),
-                        item.getPrecoUnitario(),
-                        item.getSubtotal()
-                ))
-                .collect(Collectors.toList());
+            .stream()
+            .map(item -> new ItemPedidoResponseDTO(
+                item.getProduto().getId(),
+                item.getProduto().getAlbum().getTitulo(),
+                item.getQuantidade(),
+                item.getPrecoUnitario(),
+                item.getSubtotal()
+            ))
+            .collect(Collectors.toList());
+
+        PagamentoResponseDTO pagamentoDTO = null;
 
         Pagamento p = pedido.getPagamento();
 
-        PagamentoResponseDTO pagamentoDTO =
-                new PagamentoResponseDTO(
-                        p.getId(),
-                        p.getMetodoPagamento(),
-                        p.getStatus(),
-                        p.getValor(),
-                        p.getCodigoPagamento(),
-                        p.getDataCriacao(),
-                        p.getUltimos4(),
-                        p.getBandeira()
-                );
+        if (p != null) {
+            pagamentoDTO = new PagamentoResponseDTO(
+                p.getId(),
+                p.getMetodoPagamento(),
+                p.getStatus(),
+                p.getValor(),
+                p.getCodigoPagamento(),
+                p.getDataCriacao(),
+                p.getUltimos4(),
+                p.getBandeira()
+            );
+        }
 
-        EnderecoResponseDTO enderecoDTO = pedido.getEnderecoEntrega() != null ? 
-            new EnderecoResponseDTO(
+        EnderecoResponseDTO enderecoDTO = pedido.getEnderecoEntrega() != null
+            ? new EnderecoResponseDTO(
                 pedido.getEnderecoEntrega().getId(),
                 pedido.getEnderecoEntrega().getRua(),
                 pedido.getEnderecoEntrega().getNumero(),
@@ -348,21 +416,30 @@ public class PedidoServiceImpl implements PedidoService {
                 pedido.getEnderecoEntrega().getCidade(),
                 pedido.getEnderecoEntrega().getUf(),
                 pedido.getEnderecoEntrega().getCep()
-            ) : null;
+            )
+            : null;
 
+            UsuarioPedidoResponseDTO usuarioDTO = pedido.getUsuario() != null
+    ? new UsuarioPedidoResponseDTO(
+        pedido.getUsuario().getId(),
+        pedido.getUsuario().getNome(),
+        pedido.getUsuario().getEmail(),
+        pedido.getUsuario().getTelefone()
+    )
+    : null;
 
         return new PedidoResponseDTO(
-                pedido.getId(),
-                pedido.getDataCriacao(),
-                pedido.getTotal(),
-                pedido.getStatus(),
-                pedido.getObservacao(),
-                /*pedido.getUsuario().getId(),*/
-                /*pedido.getEnderecoEntrega() != null ? pedido.getEnderecoEntrega().getId() : null,*/
-                enderecoDTO,
-                itensDTO,
-                pagamentoDTO
-        );
+    pedido.getId(),
+    pedido.getDataCriacao(),
+    pedido.getTotal(),
+    pedido.getStatus(),
+    pedido.getObservacao(),
+    usuarioDTO,
+    enderecoDTO,
+    itensDTO,
+    pagamentoDTO,
+    pedido.getCodigoCupom(),
+    pedido.getValorDesconto()
+);
     }
-
 }

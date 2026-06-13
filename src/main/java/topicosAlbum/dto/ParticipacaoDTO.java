@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record ParticipacaoDTO(
-
     @NotBlank(message = "O papel da participação é obrigatório.")
     String papel,
 
@@ -14,5 +13,7 @@ public record ParticipacaoDTO(
     Boolean destaque,
 
     @NotNull(message = "Os participantes devem ser informados.")
-    List<Long> idsProjetoMusical
+    List<Long> idsProjetoMusical,
+
+    Long idFaixa
 ) {}

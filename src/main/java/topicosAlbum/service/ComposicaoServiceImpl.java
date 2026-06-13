@@ -2,14 +2,18 @@ package topicosAlbum.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import jakarta.transaction.Transactional;
-import jakarta.inject.Inject;
+
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import topicosAlbum.dto.ComposicaoDTO;
 import topicosAlbum.dto.ComposicaoResponseDTO;
 import topicosAlbum.exception.ValidationException;
-import topicosAlbum.model.*;
-import topicosAlbum.repository.*;
+import topicosAlbum.model.Composicao;
+import topicosAlbum.model.ProjetoMusical;
+import topicosAlbum.repository.ArtistaRepository;
+import topicosAlbum.repository.ComposicaoRepository;
+import topicosAlbum.repository.GrupoMusicalRepository;
 
 @ApplicationScoped
 public class ComposicaoServiceImpl implements ComposicaoService {
@@ -18,11 +22,24 @@ public class ComposicaoServiceImpl implements ComposicaoService {
     @Inject ArtistaRepository artistaRepository;
     @Inject GrupoMusicalRepository grupoRepository;
 
-    @Override
+    /*@Override
     public List<ComposicaoResponseDTO> findAll() {
         return composicaoRepository.listAll()
             .stream().map(ComposicaoResponseDTO::valueOf).toList();
-    }
+    }*/
+
+    public List<ComposicaoResponseDTO> findAll(int page, int pageSize) {
+    return composicaoRepository.findAll()
+        .page(page, pageSize)
+        .list()
+        .stream()
+        .map(ComposicaoResponseDTO::valueOf)
+        .toList();
+}
+
+public long count() {
+    return composicaoRepository.count();
+}
 
     @Override
     public ComposicaoResponseDTO findById(Long id) {

@@ -47,6 +47,12 @@ public class Pedido extends DefaultEntity {
     @Column(name = "observacao", length = 1000)
     private String observacao;
 
+    @Column(name = "codigo_cupom", length = 50)
+    private String codigoCupom;
+
+    @Column(name = "valor_desconto", precision = 19, scale = 4)
+    private BigDecimal valorDesconto = BigDecimal.ZERO;
+
     /**
      * Status do pedido.
      * Sugestão de valores:
@@ -152,4 +158,23 @@ public class Pedido extends DefaultEntity {
                 .map(ItemPedido::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    public String getCodigoCupom() {
+    return codigoCupom;
+}
+
+public void setCodigoCupom(String codigoCupom) {
+    this.codigoCupom = codigoCupom;
+}
+
+public BigDecimal getValorDesconto() {
+    return valorDesconto;
+}
+
+public void setValorDesconto(BigDecimal valorDesconto) {
+    this.valorDesconto = valorDesconto;
+
+    
+}
+
 }

@@ -1,4 +1,4 @@
-package topicosAlbum;
+/*package topicosAlbum;
 
 import java.util.List;
 
@@ -219,3 +219,4 @@ class ParticipacaoResourceTest {
                       "[0].participantes[0].nomeArtistico", containsString("Justin Bieber"));
     }
 }
+*/

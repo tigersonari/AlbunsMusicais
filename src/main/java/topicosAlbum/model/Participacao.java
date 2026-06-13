@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -26,6 +27,10 @@ public class Participacao extends DefaultEntity {
     /*lista todos os artistas ou grupos musicais que participaram da faixa, deve ser lista porque uma faixa
      * pode ter mais de uma participação (ex: música com dois feats)
     */
+
+    @ManyToOne
+@JoinColumn(name = "idfaixa")
+private Faixa faixa;
 
     public String getPapel() {
         return papel;
@@ -51,7 +56,13 @@ public class Participacao extends DefaultEntity {
         this.projetoMusical = projetoMusical;
     }
 
-    
+    public Faixa getFaixa() {
+    return faixa;
+}
+
+public void setFaixa(Faixa faixa) {
+    this.faixa = faixa;
+}
 
 
 }
