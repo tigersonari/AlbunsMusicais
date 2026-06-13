@@ -52,6 +52,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuario;
     }
 
+
+
     @Override
 @Transactional
 public UsuarioResponseDTO create(UsuarioDTO dto) {
@@ -163,14 +165,18 @@ public UsuarioResponseDTO atualizarPerfil(Long idUsuario, AtualizarPerfilDTO dto
     }
 
     @Override
+@Transactional
 public void promoverParaAdmin(Long idUsuario) {
-    Usuario usuario = findById(idUsuario);
+    Usuario usuario = repository.findById(idUsuario);
 
     if (usuario == null) {
-        throw new RuntimeException("Usuário não encontrado.");
+        throw ValidationException.of("usuario", "Usuário não encontrado.");
+    }
+
+    if (usuario.getPerfil() == Perfil.ADM) {
+        throw ValidationException.of("perfil", "Usuário já é administrador.");
     }
 
     usuario.setPerfil(Perfil.ADM);
 }
-
 }

@@ -188,12 +188,12 @@ public Response atualizarPerfil(@Valid AtualizarPerfilDTO dto) {
 
     // ---------------- PROMOVER USUÁRIO A ADMIN (ADM) ----------------
     @PUT
-    @Path("/{id}/promover-adm")
-    @RolesAllowed("ADM")
-    public Response promoverParaAdmin(@PathParam("id") Long id) {
-        service.promoverParaAdmin(id);
-        return Response.noContent().build();
-    }
+@Path("/{id}/promover-adm")
+@RolesAllowed("ADM")
+public Response promoverParaAdmin(@PathParam("id") Long id) {
+    service.promoverParaAdmin(id);
+    return Response.noContent().build();
+}
 
 
 }
